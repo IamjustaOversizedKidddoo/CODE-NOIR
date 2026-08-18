@@ -249,22 +249,16 @@ export function CaseDropzone() {
               >
                 📁 SELECT .ZIP ARCHIVE
               </BrutalistButton>
-              {/* Folder upload hidden on mobile — not supported by mobile browsers */}
               <BrutalistButton
                 type="button"
                 variant="lavender"
                 size="sm"
                 onClick={() => folderInputRef.current?.click()}
-                className="hidden md:inline-flex"
               >
                 📂 SELECT ENTIRE FOLDER
               </BrutalistButton>
             </div>
 
-            {/* Mobile notice — only visible on small screens */}
-            <p className="md:hidden font-mono text-xs text-[#F27661] font-black mt-3 border border-[#F27661] px-3 py-2 bg-[#F27661]/10">
-              📱 MOBILE: Folder upload not supported by mobile browsers. Please use a <span className="underline">.zip file</span> instead. Zip your project folder on desktop first.
-            </p>
 
             <div className="flex flex-wrap justify-center gap-2 mt-3">
               <span className="font-mono text-[11px] bg-white px-2 py-1 border border-[#171717] font-bold shadow-[2px_2px_0px_#171717]">
