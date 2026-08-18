@@ -1,0 +1,50 @@
+{
+  "name": "code-explainer",
+  "version": "1.0.0",
+  "description": "CODE NOIR — AI-powered codebase investigation and learning",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "eval": "npx tsx scripts/eval-runner.ts",
+    "eval:fast": "npx tsx scripts/eval-runner.ts",
+    "eval:security": "npx tsx scripts/eval-runner.ts",
+    "eval:regression": "npx tsx scripts/eval-runner.ts",
+    "qa": "npx tsx scripts/qa-runner.ts",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "adm-zip": "^0.5.16",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
+    "next": "^16.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/archiver": "^6.0.3",
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "archiver": "^7.0.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.2",
+    "prisma": "^6.4.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

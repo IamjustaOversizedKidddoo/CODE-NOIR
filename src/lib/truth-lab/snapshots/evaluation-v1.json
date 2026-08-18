@@ -1,0 +1,85 @@
+{
+  "runId": "RUN-1787044218297",
+  "timestamp": "2026-08-18T09:10:18.736Z",
+  "overallPassed": true,
+  "metrics": {
+    "factualAccuracy": 1,
+    "citationAccuracy": 0.98,
+    "relationshipPrecision": 0.8571428571428571,
+    "relationshipRecall": 1,
+    "relationshipF1": 0.923076923076923,
+    "flowAccuracy": 0.95,
+    "investigationAccuracy": 0.96,
+    "teachingAccuracy": 0.97,
+    "answerEvaluation": 0.98,
+    "securityPrecision": 1,
+    "securityRecall": 1,
+    "hallucinationRate": 0,
+    "personaPreservation": 1,
+    "ambiguityHandling": 1
+  },
+  "categoryScores": {
+    "FACTUAL_ACCURACY": {
+      "passCount": 4,
+      "failCount": 0,
+      "passRate": 1
+    },
+    "RELATIONSHIP_ACCURACY": {
+      "passCount": 9,
+      "failCount": 0,
+      "passRate": 0.923076923076923
+    },
+    "CITATION_ACCURACY": {
+      "passCount": 10,
+      "failCount": 0,
+      "passRate": 1
+    },
+    "INVESTIGATION_ACCURACY": {
+      "passCount": 10,
+      "failCount": 0,
+      "passRate": 0.96
+    },
+    "FLOW_ACCURACY": {
+      "passCount": 10,
+      "failCount": 0,
+      "passRate": 0.95
+    },
+    "TEACHING_ACCURACY": {
+      "passCount": 10,
+      "failCount": 0,
+      "passRate": 0.97
+    },
+    "ANSWER_EVALUATION": {
+      "passCount": 10,
+      "failCount": 0,
+      "passRate": 0.98
+    },
+    "SECURITY_PRECISION": {
+      "passCount": 10,
+      "failCount": 0,
+      "passRate": 1
+    },
+    "SECURITY_RECALL": {
+      "passCount": 10,
+      "failCount": 0,
+      "passRate": 1
+    },
+    "HALLUCINATION_RATE": {
+      "passCount": 10,
+      "failCount": 0,
+      "passRate": 1
+    },
+    "PERSONA_FACT_PRESERVATION": {
+      "passCount": 6,
+      "failCount": 0,
+      "passRate": 1
+    },
+    "AMBIGUITY_HANDLING": {
+      "passCount": 1,
+      "failCount": 0,
+      "passRate": 1
+    }
+  },
+  "failureDossiers": [],
+  "benchmarkProjectId": "cmsyfzjrs0000v5f0xozohzy6"
+}

@@ -1,0 +1,411 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Project {
+  id            String         @id @default(cuid())
+  caseNumber    String         @unique // e.g. "CASE-2026-9041"
+  name          String
+  description   String?
+  totalFiles    Int            @default(0)
+  includedFiles Int            @default(0)
+  ignoredFiles  Int            @default(0)
+  totalLines    Int            @default(0)
+  totalBytes    Int            @default(0)
+  primaryLang   String?
+  techStack     String?        // JSON string of detected technology profile
+  manifestsJson String?        // JSON string of analyzed manifests
+  entryPoints   String?        // JSON array of detected entry points with evidence & confidence
+  envVarsJson   String?        // JSON array of detected environment variable references (names only)
+  endpointsJson String?        // JSON array of detected API endpoints
+  dbEvidenceJson String?       // JSON array of static database evidence
+  brainJson     String?        // JSON structured project brain summary
+  status        String         @default("CREATED") // Typed via ProjectStatus enum
+  statusMessage String?
+  progress      Int            @default(0) // 0 - 100
+  storagePath   String         // e.g. ".storage/cases/cuid/raw"
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  files         ProjectFile[]
+  symbols       CodeSymbol[]
+  dependencies  Dependency[]
+  findings      Finding[]
+  securityFindings SecurityFinding[]
+  lessons       Lesson[]
+  conversations Conversation[]
+  events        ProjectEvent[]
+  investigations Investigation[]
+  learningPaths LearningPath[]
+  learnerProgress LearnerProgress[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ProjectEvent {
+  id         String   @id @default(cuid())
+  projectId  String
+  eventType  String   // CASE_OPENED, EXTRACTING, DISCOVERING_EVIDENCE, PARSING, MAPPING, etc.
+  state      String   // Corresponding ProjectStatus
+  message    String
+  progress   Int      @default(0)
+  data       String?  // JSON structured payload
+  createdAt  DateTime @default(now())
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+}
+
+model ProjectFile {
+  id            String       @id @default(cuid())
+  projectId     String
+  path          String       // Normalized relative path, e.g. "src/auth/token.ts"
+  extension     String       // Normalized e.g. ".ts"
+  language      String       @default("UNSUPPORTED_LANGUAGE") // TYPESCRIPT, JAVASCRIPT, PYTHON, JSON, YAML, etc.
+  sizeBytes     Int          @default(0)
+  lineCount     Int          @default(0)
+  isBinary      Boolean      @default(false)
+  isIgnored     Boolean      @default(false)
+  ignoreReason  String?      // e.g. "node_modules", "binary file", "build artifact"
+  isEntry       Boolean      @default(false)
+  isSuspicious  Boolean      @default(false)
+  hash          String       // SHA-256 hash of file contents
+  summary       String?      // AI case note on file responsibility
+  createdAt     DateTime     @default(now())
+
+  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  symbols       CodeSymbol[]
+  dependencies  Dependency[] @relation("FileDependencies")
+  dependents    Dependency[] @relation("FileDependents")
+  findings      Finding[]
+  securityFindings SecurityFinding[]
+
+  @@unique([projectId, path])
+  @@index([projectId, isIgnored])
+  @@index([projectId, language])
+  @@index([hash])
+}
+
+model CodeSymbol {
+  id             String       @id @default(cuid())
+  projectId      String
+  fileId         String
+  name           String       // e.g. "verifyToken"
+  qualifiedName  String?      // e.g. "AuthService.verifyToken"
+  kind           String       // FUNCTION, METHOD, CLASS, INTERFACE, TYPE, ENUM, VARIABLE, CONSTANT, PROPERTY, CONSTRUCTOR, DECORATOR, MODULE
+  startLine      Int
+  endLine        Int
+  startCol       Int          @default(0)
+  endCol         Int          @default(0)
+  signature      String?
+  complexity     Int          @default(1)
+  isExported     Boolean      @default(false)
+  confidence     String       @default("CONFIRMED") // CONFIRMED, LIKELY, POSSIBLE, UNKNOWN
+  language       String?
+  parentSymbolId String?
+  createdAt      DateTime     @default(now())
+
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  file           ProjectFile  @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  parentSymbol   CodeSymbol?  @relation("SymbolHierarchy", fields: [parentSymbolId], references: [id], onDelete: Cascade)
+  childSymbols   CodeSymbol[] @relation("SymbolHierarchy")
+  callsOut       CallEdge[]   @relation("CallerSymbols")
+  callsIn        CallEdge[]   @relation("CalleeSymbols")
+
+  @@index([projectId, fileId])
+  @@index([name])
+  @@index([qualifiedName])
+  @@index([kind])
+}
+
+model CallEdge {
+  id           String      @id @default(cuid())
+  projectId    String
+  callerId     String
+  calleeId     String?     // Nullable if external or unresolved
+  calleeName   String      // e.g. "authHelper"
+  relationship String      @default("CALLS") // CALLS, EXTENDS, IMPLEMENTS, USES, REFERENCES, HTTP_CALL, DB_QUERY
+  confidence   String      @default("CONFIRMED") // CONFIRMED, LIKELY, POSSIBLE, UNKNOWN
+  fileId       String
+  line         Int
+  evidence     String?
+  createdAt    DateTime    @default(now())
+
+  caller       CodeSymbol  @relation("CallerSymbols", fields: [callerId], references: [id], onDelete: Cascade)
+  callee       CodeSymbol? @relation("CalleeSymbols", fields: [calleeId], references: [id], onDelete: Cascade)
+
+  @@index([callerId])
+  @@index([calleeId])
+  @@index([projectId, relationship])
+}
+
+model Dependency {
+  id               String       @id @default(cuid())
+  projectId        String
+  sourceFileId     String
+  targetFileId     String?      // Nullable if external package (e.g. "express")
+  externalPackage  String?      // e.g. "jsonwebtoken"
+  importName       String?      // e.g. "{ verify }" or "default"
+  importType       String       @default("NAMED") // NAMED, DEFAULT, NAMESPACE, SIDE_EFFECT, DYNAMIC, REQUIRE
+  resolutionStatus String       @default("RESOLVED") // RESOLVED, AMBIGUOUS, UNRESOLVED
+  confidence       String       @default("CONFIRMED") // CONFIRMED, LIKELY, POSSIBLE, UNKNOWN
+  evidenceLine     Int?
+  createdAt        DateTime     @default(now())
+
+  project          Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sourceFile       ProjectFile  @relation("FileDependencies", fields: [sourceFileId], references: [id], onDelete: Cascade)
+  targetFile       ProjectFile? @relation("FileDependents", fields: [targetFileId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sourceFileId])
+  @@index([targetFileId])
+  @@index([resolutionStatus])
+}
+
+model Finding {
+  id          String       @id @default(cuid())
+  projectId   String
+  fileId      String?
+  type        String       // SECURITY_THREAT, ARCHITECTURAL_SMELL, DEAD_CODE, SECRET_LEAK
+  severity    String       // CRITICAL, HIGH, MEDIUM, LOW, INFORMATIONAL
+  title       String
+  description String
+  roast       String       // Sarcastic detective roast
+  lineStart   Int?
+  lineEnd     Int?
+  createdAt   DateTime     @default(now())
+
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  file        ProjectFile? @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, severity])
+}
+
+model LearningPath {
+  id                String           @id @default(cuid())
+  projectId         String
+  title             String
+  description       String
+  difficulty        String           @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  estimatedDuration Int              @default(60) // minutes
+  prerequisitesJson String?          // JSON array of prerequisite concept names
+  version           Int              @default(1)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  project           Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  modules           LearningModule[]
+  lessons           Lesson[]
+  learnerProgress   LearnerProgress[]
+
+  @@index([projectId, difficulty])
+}
+
+model LearningModule {
+  id                String       @id @default(cuid())
+  learningPathId    String
+  title             String
+  description       String
+  order             Int
+  level             Int          // 0 to 10
+  difficulty        String       @default("BEGINNER")
+  prerequisitesJson String?      // JSON array
+  createdAt         DateTime     @default(now())
+
+  learningPath      LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  lessons           Lesson[]
+
+  @@index([learningPathId, order])
+}
+
+model Lesson {
+  id                String            @id @default(cuid())
+  projectId         String
+  learningPathId    String?
+  moduleId          String?
+  level             Int               // 0 to 10
+  order             Int               @default(1)
+  title             String
+  objective         String
+  type              String            // OVERVIEW, TECH_STACK, STRUCTURE, STARTUP, CONNECTIVITY, CORE_MODULE, FUNCTION_CLASS, PREREQUISITE, RUNTIME_FLOW, SECURITY, MODIFICATION, DETOUR
+  difficulty        String            @default("BEGINNER")
+  prerequisitesJson String?           // JSON array of required concepts
+  contentJson       String            // Full structured lesson payload (sections, explanation, code slices)
+  evidenceJson      String?           // Referenced files, lines, symbols
+  investigationType String?           // Linked Phase 4 investigation type
+  interactiveQJson  String?           // Interactive question definition
+  estimatedMinutes  Int               @default(5)
+  isStale           Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  project           Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  learningPath      LearningPath?     @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  module            LearningModule?   @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  questionAttempts  QuestionAttempt[]
+
+  @@index([projectId, level])
+  @@index([learningPathId, order])
+}
+
+model Concept {
+  id                String           @id @default(cuid())
+  projectId         String
+  name              String
+  description       String
+  category          String           // LANGUAGE, FRAMEWORK, ARCHITECTURE, SECURITY, DATA_FLOW
+  difficulty        String           @default("BEGINNER")
+  prerequisitesJson String?          // JSON array of concept names
+  relatedFilesJson  String?          // JSON array
+  relatedSymbolsJson String?         // JSON array
+  confidence        String           @default("CONFIRMED")
+  createdAt         DateTime         @default(now())
+
+  masteries         ConceptMastery[]
+
+  @@unique([projectId, name])
+  @@index([projectId, category])
+}
+
+model LearnerProgress {
+  id                String       @id @default(cuid())
+  projectId         String
+  learningPathId    String
+  userId            String       @default("anonymous_detective")
+  currentLessonId   String?
+  completedLessons  String       @default("[]") // JSON array of lesson IDs
+  activeDetourJson  String?      // Active prerequisite detour state if any
+  currentLevel      Int          @default(0)
+  explanationMode   String       @default("STANDARD") // ELI5, BEGINNER, STANDARD, DEVELOPER, SENIOR_ENGINEER
+  overallScore      Float        @default(0.0)
+  lastActivityAt    DateTime     @default(now())
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  project           Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  learningPath      LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([learningPathId])
+}
+
+model ConceptMastery {
+  id                String   @id @default(cuid())
+  conceptId         String
+  userId            String   @default("anonymous_detective")
+  score             Float    @default(0.0) // 0.0 to 1.0 (100%)
+  status            String   @default("UNKNOWN") // MASTERED, LEARNED, NEEDS_REVIEW, STRUGGLING, UNKNOWN
+  correctAttempts   Int      @default(0)
+  totalAttempts     Int      @default(0)
+  lastTestedAt      DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  concept           Concept  @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+
+  @@unique([conceptId, userId])
+}
+
+model QuestionAttempt {
+  id                String   @id @default(cuid())
+  lessonId          String
+  userId            String   @default("anonymous_detective")
+  userAnswer        String
+  evaluationStatus  String   // CORRECT, PARTIALLY_CORRECT, INCORRECT, INSUFFICIENT_INFORMATION
+  score             Float    // 0.0 to 1.0
+  feedbackJson      String   // Structured explanation, praise, and missing concept details
+  createdAt         DateTime @default(now())
+
+  lesson            Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, userId])
+}
+
+model Conversation {
+  id          String    @id @default(cuid())
+  projectId   String
+  title       String    @default("Interrogation Transcript")
+  createdAt   DateTime  @default(now())
+  messages    Message[]
+
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  role           String       // user, assistant, system
+  content        String
+  evidenceJson   String?      // Attached evidence nodes & files
+  createdAt      DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+model Investigation {
+  id                String   @id @default(cuid())
+  projectId         String
+  type              String   // ARCHITECTURE, STARTUP_FLOW, RUNTIME_FLOW, CALL_FLOW, DATA_FLOW, API_FLOW, DATABASE_FLOW, AUTHENTICATION_FLOW, DEPENDENCY_FLOW, CONFIGURATION_FLOW, EXTERNAL_SERVICE_FLOW, BLAST_RADIUS, COMPONENT_RELATIONSHIP, PROJECT_STORY
+  title             String
+  question          String
+  startingEntities  String?  // JSON array of starting entity references
+  stepsJson         String   // JSON array of ordered investigation steps
+  evidenceJson      String   // JSON array of evidence citations
+  relationshipsJson String?  // JSON array of graph relationships
+  primaryPathJson   String?  // JSON array of primary path nodes
+  alternativePathsJson String? // JSON array of alternative path branches
+  confidence        String   @default("LIKELY") // CONFIRMED, LIKELY, POSSIBLE, UNKNOWN
+  uncertaintiesJson String?  // JSON array of uncertainties / unknowns
+  affectedEntities  String?  // JSON array of affected entities
+  externalServices  String?  // JSON array of external service references
+  metadataJson      String?  // JSON metadata
+  createdAt         DateTime @default(now())
+
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, type])
+  @@index([projectId, createdAt])
+}
+
+model SecurityFinding {
+  id                    String       @id @default(cuid())
+  projectId             String
+  type                  String       // SECRET_LEAK, SQL_INJECTION, COMMAND_INJECTION, XSS, PATH_TRAVERSAL, SSRF, DESERIALIZATION, AUTH_WEAKNESS, CRYPTO_WEAKNESS, INSECURE_TRANSPORT, UNVALIDATED_UPLOAD, TRUST_BOUNDARY_VIOLATION
+  title                 String
+  description           String
+  severity              String       // INFO, LOW, MEDIUM, HIGH, CRITICAL
+  confidence            String       @default("CONFIRMED") // CONFIRMED, LIKELY, POSSIBLE, UNKNOWN
+  status                String       @default("OPEN") // OPEN, REVIEWED, FALSE_POSITIVE, RESOLVED, ACCEPTED_RISK
+  statusReason          String?      // Optional explanation when marked false positive or resolved
+  fileId                String?
+  filePath              String
+  symbolId              String?
+  symbolName            String?
+  startLine             Int?
+  endLine               Int?
+  evidenceSnippet       String?      // Sanitized / redacted snippet
+  cwe                   String?      // e.g. "CWE-798"
+  owaspCategory         String?      // e.g. "A01:2021-Broken Access Control"
+  affectedEntitiesJson  String?      // JSON array
+  remediationJson       String?      // JSON structured remediation (whyItMatters, recommendedFix, validationSteps)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  project               Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  file                  ProjectFile? @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, severity])
+  @@index([projectId, status])
+  @@index([projectId, type])
+}
+
+

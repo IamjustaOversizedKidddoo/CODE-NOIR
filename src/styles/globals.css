@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-ink: #171717;
+  --color-ivory: #F5F1E8;
+  --color-cobalt: #3157D5;
+  --color-golden: #F4C542;
+  --color-coral: #F27661;
+  --color-mint: #8ED8B0;
+  --color-lavender: #B8A7E8;
+
+  --color-bg: #F5F1E8;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #EBE5D8;
+  --color-border: #171717;
+  --color-text: #171717;
+  --color-text-muted: #4A4A4A;
+  --color-crime-red: #F27661;
+  --color-crime-red-hover: #DE5D47;
+  --color-caution-yellow: #F4C542;
+  --color-tape-yellow: #F4C542;
+  --color-night-black: #171717;
+  --color-card-dark: #1E1E1E;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-golden);
+    color: var(--color-ink);
+  }
+}
+
+/* Universal Cyber Detective Crime Tape Pattern (Golden Yellow & Deep Ink) */
+.crime-tape {
+  background: repeating-linear-gradient(
+    -45deg,
+    #F4C542,
+    #F4C542 20px,
+    #171717 20px,
+    #171717 40px
+  );
+  color: #171717;
+}
+
+/* CRT Scanline & Grain Texture Overlay */
+.scanline-overlay {
+  background: linear-gradient(
+    rgba(23, 23, 23, 0) 50%, 
+    rgba(23, 23, 23, 0.04) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(49, 87, 213, 0.02),
+    rgba(244, 197, 66, 0.02),
+    rgba(242, 118, 97, 0.02)
+  );
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
+
+/* Redaction block styling */
+.redacted {
+  background-color: #171717;
+  color: #171717;
+  padding: 0 4px;
+  user-select: none;
+}
+
+.redacted:hover {
+  background-color: #F27661;
+  color: #FFFFFF;
+}
+
+/* Neo-Brutalist Custom Utilities */
+.shadow-brutal {
+  box-shadow: 4px 4px 0px #171717;
+}
+
+.shadow-brutal-sm {
+  box-shadow: 2px 2px 0px #171717;
+}
+
+.shadow-brutal-lg {
+  box-shadow: 6px 6px 0px #171717;
+}
+
+.shadow-brutal-xl {
+  box-shadow: 8px 8px 0px #171717;
+}
+
+.shadow-brutal-cobalt {
+  box-shadow: 4px 4px 0px #3157D5;
+}
+
+.shadow-brutal-golden {
+  box-shadow: 4px 4px 0px #F4C542;
+}
+
+.shadow-brutal-coral {
+  box-shadow: 4px 4px 0px #F27661;
+}
+
+.shadow-brutal-mint {
+  box-shadow: 4px 4px 0px #8ED8B0;
+}
+
+.shadow-brutal-lavender {
+  box-shadow: 4px 4px 0px #B8A7E8;
+}
+
+.pinboard-grid {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(23, 23, 23, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(23, 23, 23, 0.06) 1px, transparent 1px);
+}
+
+.pinboard-grid-dark {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+/* Brutalist Semantic Stamps */
+.stamp-classified {
+  display: inline-block;
+  padding: 4px 12px;
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  border: 3px solid #F27661;
+  color: #F27661;
+  transform: rotate(-3deg);
+  box-shadow: 2px 2px 0px rgba(242, 118, 97, 0.3);
+}
+
+.stamp-evidence {
+  display: inline-block;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  font-weight: 800;
+  border: 2px solid #171717;
+  background-color: #F4C542;
+  color: #171717;
+  box-shadow: 2px 2px 0px #171717;
+}
+
+.stamp-confirmed {
+  display: inline-block;
+  padding: 3px 8px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  border: 2px solid #171717;
+  background-color: #8ED8B0;
+  color: #171717;
+  box-shadow: 2px 2px 0px #171717;
+}
+
+.stamp-likely {
+  display: inline-block;
+  padding: 3px 8px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  border: 2px solid #171717;
+  background-color: #F4C542;
+  color: #171717;
+  box-shadow: 2px 2px 0px #171717;
+}
+
+.stamp-unknown {
+  display: inline-block;
+  padding: 3px 8px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  border: 2px solid #171717;
+  background-color: #B8A7E8;
+  color: #171717;
+  box-shadow: 2px 2px 0px #171717;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
