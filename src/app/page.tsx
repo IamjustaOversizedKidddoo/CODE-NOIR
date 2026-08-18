@@ -68,8 +68,28 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Dropzone Evidence Terminal */}
-        <CaseDropzone />
+        {/* Dropzone Evidence Terminal — GIF plays as background behind the box */}
+        <div className="relative rounded-none">
+          {/* GIF Background Layer — decorative, behind the upload box */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/dropzone-bg.gif"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none rounded-none"
+            style={{ zIndex: 0 }}
+          />
+          {/* Gradient overlay to keep upload card text legible */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-b from-[#F5F1E8]/30 via-transparent to-[#F5F1E8]/30 pointer-events-none select-none"
+            style={{ zIndex: 1 }}
+          />
+          {/* Upload box sits above GIF */}
+          <div className="relative py-6" style={{ zIndex: 2 }}>
+            <CaseDropzone />
+          </div>
+        </div>
 
         {/* Investigative Pillars / Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-16">
