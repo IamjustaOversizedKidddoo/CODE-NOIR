@@ -181,7 +181,24 @@ export function CaseDropzone() {
       />
 
       {/* Investigation Vault Container */}
-      <div data-tour="upload-dropzone" className="bg-[#FFFFFF] border-4 border-[#171717] shadow-[8px_8px_0px_#171717] p-6 md:p-8 relative">
+      <div data-tour="upload-dropzone" className="bg-[#FFFFFF] border-4 border-[#171717] shadow-[8px_8px_0px_#171717] p-6 md:p-8 relative overflow-hidden">
+        {/* GIF Background — decorative, fully non-interactive */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/dropzone-bg.gif"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none opacity-10 mix-blend-multiply"
+          style={{ zIndex: 0 }}
+        />
+        {/* Subtle overlay so text stays crisp over the GIF */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-white/60 pointer-events-none select-none"
+          style={{ zIndex: 1 }}
+        />
+        {/* Content wrapper — must sit above GIF (z-0) and overlay (z-1) */}
+        <div className="relative z-[2]">
         {/* Dossier Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b-3 border-[#171717] mb-6">
           <div className="flex items-center gap-3">
@@ -387,6 +404,7 @@ export function CaseDropzone() {
             </div>
           </div>
         )}
+        </div>{/* /Content wrapper */}
       </div>
     </div>
   );
