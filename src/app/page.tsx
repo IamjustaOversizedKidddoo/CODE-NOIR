@@ -2,16 +2,20 @@ import { CrimeTape } from '@/components/ui/CrimeTape';
 import { EvidenceBadge } from '@/components/ui/EvidenceBadge';
 import { CaseDropzone } from '@/components/landing/CaseDropzone';
 import { DetectiveBriefingTour, ReplayGuideButton } from '@/components/detective/DetectiveBriefingTour';
+import { NoirBackgroundOverlay } from '@/components/landing/NoirBackgroundOverlay';
 import { Shield, Cpu, Terminal, FileCode2, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
 
 export default function LandingPage() {
   return (
     <main className="flex-1 flex flex-col justify-between relative overflow-hidden bg-[#F5F1E8]">
+      {/* Cinematic Noir Detective Background Overlay */}
+      <NoirBackgroundOverlay />
+
       {/* Interactive First-Time Guided Tour */}
       <DetectiveBriefingTour />
 
       {/* Top Classified Header Bar */}
-      <header className="border-b-4 border-[#171717] bg-[#171717] text-white px-4 md:px-8 py-3">
+      <header className="border-b-4 border-[#171717] bg-[#171717] text-white px-4 md:px-8 py-3 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 bg-[#F4C542] border border-[#171717]"></span>
@@ -36,7 +40,7 @@ export default function LandingPage() {
       <CrimeTape text="CRIME SCENE INVESTIGATION // UNFAMILIAR REPOSITORY DETECTED // RECONSTRUCTING SCENE" />
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 pt-12 md:pt-16 pb-8 w-full">
+      <section className="max-w-7xl mx-auto px-4 md:px-8 pt-12 md:pt-16 pb-8 w-full relative z-10">
         <div className="text-center max-w-4xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 mb-4">
             <EvidenceBadge label="INVESTIGATION ENGINE" variant="coral" />
@@ -114,7 +118,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t-4 border-[#171717] bg-[#171717] text-white py-6 px-4 md:px-8 mt-16">
+      <footer className="border-t-4 border-[#171717] bg-[#171717] text-white py-6 px-4 md:px-8 mt-16 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
           <div className="flex items-center gap-2">
             <span className="font-black text-[#F4C542]">CODE NOIR</span>
