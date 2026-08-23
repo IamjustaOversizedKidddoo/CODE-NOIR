@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { BrutalistButton } from '../ui/BrutalistButton';
 import { EvidenceBadge } from '../ui/EvidenceBadge';
-import { UploadCloud, Folder, CheckCircle2, ShieldAlert, FileArchive } from 'lucide-react';
+import { UploadCloud, Folder, CheckCircle2, ShieldAlert, FileArchive, GitBranch, Link as LinkIcon } from 'lucide-react';
 
 interface IngestionSummary {
   caseId: string;
@@ -17,6 +17,8 @@ interface IngestionSummary {
 }
 
 export function CaseDropzone() {
+  const [intakeMode, setIntakeMode] = useState<'FILES' | 'GITHUB'>('FILES');
+  const [githubUrl, setGithubUrl] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFolderFiles, setSelectedFolderFiles] = useState<File[]>([]);
@@ -43,6 +45,7 @@ export function CaseDropzone() {
     e.preventDefault();
     setIsDragging(false);
     setErrorMsg(null);
+    setIntakeMode('FILES');
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const files = Array.from(e.dataTransfer.files);
@@ -62,6 +65,7 @@ export function CaseDropzone() {
 
   const handleZipSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     setErrorMsg(null);
+    setIntakeMode('FILES');
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setSelectedFile(file);
@@ -72,6 +76,7 @@ export function CaseDropzone() {
 
   const handleFolderSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     setErrorMsg(null);
+    setIntakeMode('FILES');
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
       setSelectedFolderFiles(files);
@@ -85,48 +90,71 @@ export function CaseDropzone() {
   };
 
   const handleUpload = async () => {
+    const isGitHubSubmission = intakeMode === 'GITHUB' || (githubUrl.trim().length > 0 && !selectedFile && selectedFolderFiles.length === 0);
     const hasZip = Boolean(selectedFile);
     const hasFolder = selectedFolderFiles.length > 0;
 
-    if (!hasZip && !hasFolder) {
-      setErrorMsg('No evidence archive or files submitted. Please select a .zip archive or project folder.');
+    if (!isGitHubSubmission && !hasZip && !hasFolder) {
+      setErrorMsg('No evidence submitted. Please enter a public GitHub repository URL, select a .zip archive, or select a project folder.');
+      return;
+    }
+
+    if (isGitHubSubmission && !githubUrl.trim()) {
+      setErrorMsg('Please enter a valid public GitHub repository URL.');
       return;
     }
 
     setIsUploading(true);
     setUploadProgress(10);
-    setStatusLog('SECURING SANDBOX ENVIRONMENT...');
     setErrorMsg(null);
 
-    const formData = new FormData();
-
-    if (hasZip && selectedFile) {
-      formData.append('archive', selectedFile);
-      formData.append('file', selectedFile);
-      formData.append('projectName', selectedFile.name.replace(/\.zip$/i, ''));
-    } else if (hasFolder) {
-      formData.append('projectName', folderName || 'Uploaded Project Folder');
-      for (const file of selectedFolderFiles) {
-        formData.append('files', file);
-        formData.append('paths', file.webkitRelativePath || file.name);
-      }
-    }
-
     try {
-      setStatusLog('ANALYZING & DECOMPRESSING EVIDENCE...');
-      setUploadProgress(40);
+      let res: Response;
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      if (isGitHubSubmission) {
+        setStatusLog('CONNECTING TO GITHUB VAULT & DOWNLOADING ARCHIVE...');
+        setUploadProgress(30);
+
+        res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            githubUrl: githubUrl.trim(),
+          }),
+        });
+      } else {
+        setStatusLog('SECURING SANDBOX ENVIRONMENT...');
+        const formData = new FormData();
+
+        if (hasZip && selectedFile) {
+          formData.append('archive', selectedFile);
+          formData.append('file', selectedFile);
+          formData.append('projectName', selectedFile.name.replace(/\.zip$/i, ''));
+        } else if (hasFolder) {
+          formData.append('projectName', folderName || 'Uploaded Project Folder');
+          for (const file of selectedFolderFiles) {
+            formData.append('files', file);
+            formData.append('paths', file.webkitRelativePath || file.name);
+          }
+        }
+
+        setStatusLog('ANALYZING & DECOMPRESSING EVIDENCE...');
+        setUploadProgress(40);
+
+        res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+      }
 
       setUploadProgress(75);
       setStatusLog('BUILDING STATIC AST & SYMBOL GRAPH...');
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to analyze archive');
+        throw new Error(errorData.error || 'Failed to analyze evidence.');
       }
 
       const data = await res.json();
@@ -141,7 +169,7 @@ export function CaseDropzone() {
         ignoredFiles: data.summary?.ignoredFiles || 0,
         totalLines: data.summary?.totalLines || 0,
         totalBytes: data.summary?.totalBytes || 0,
-        primaryLang: data.summary?.primaryLanguage || 'TypeScript',
+        primaryLang: data.summary?.primaryLang || data.summary?.primaryLanguage || 'TypeScript',
       });
 
       // Redirect to Case Brief (Orientation Landing Page)
@@ -155,6 +183,7 @@ export function CaseDropzone() {
       setIsUploading(false);
     }
   };
+
 
   const totalFolderSize = selectedFolderFiles.reduce((acc, f) => acc + f.size, 0);
 
@@ -196,83 +225,160 @@ export function CaseDropzone() {
           </div>
         </div>
 
-        {/* Dropzone Area */}
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={`border-3 border-dashed transition-all p-8 md:p-10 text-center relative ${
-            isDragging
-              ? 'border-[#3157D5] bg-[#3157D5]/10 scale-[0.99]'
-              : 'border-[#171717] bg-[#F5F1E8] hover:bg-[#EBE5D8]'
-          }`}
-        >
-          <div className="flex flex-col items-center justify-center gap-4">
-            <div className="w-16 h-16 bg-[#171717] text-white border-2 border-[#171717] flex items-center justify-center shadow-[4px_4px_0px_#3157D5]">
-              {selectedFolderFiles.length > 0 ? (
-                <Folder className="w-8 h-8 text-[#8ED8B0]" />
-              ) : selectedFile ? (
-                <FileArchive className="w-8 h-8 text-[#F4C542]" />
-              ) : (
-                <UploadCloud className="w-8 h-8 text-[#F4C542]" />
-              )}
-            </div>
+        {/* Mode Switcher Tabs */}
+        <div className="flex items-center gap-2 mb-6">
+          <button
+            type="button"
+            onClick={() => {
+              setIntakeMode('FILES');
+              setErrorMsg(null);
+            }}
+            className={`font-mono text-xs font-black px-4 py-2 border-2 border-[#171717] transition ${
+              intakeMode === 'FILES'
+                ? 'bg-[#F4C542] text-[#171717] shadow-[3px_3px_0px_#171717]'
+                : 'bg-[#F5F1E8] text-[#4A4A4A] hover:bg-[#EBE5D8]'
+            }`}
+          >
+            📁 ARCHIVE / FOLDER
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIntakeMode('GITHUB');
+              setErrorMsg(null);
+            }}
+            className={`font-mono text-xs font-black px-4 py-2 border-2 border-[#171717] transition flex items-center gap-1.5 ${
+              intakeMode === 'GITHUB'
+                ? 'bg-[#3157D5] text-white shadow-[3px_3px_0px_#171717]'
+                : 'bg-[#F5F1E8] text-[#4A4A4A] hover:bg-[#EBE5D8]'
+            }`}
+          >
+            <GitBranch className="w-4 h-4" /> 🐙 PUBLIC GITHUB REPO
+          </button>
+        </div>
 
-            <div>
-              <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-[#171717]">
-                {selectedFile ? (
-                  `ZIP ARCHIVE: ${selectedFile.name}`
-                ) : selectedFolderFiles.length > 0 ? (
-                  `FOLDER SELECTED: ${folderName}`
-                ) : (
-                  'DROP CODEBASE ARCHIVE OR FOLDER HERE'
-                )}
-              </h3>
-              <p className="font-mono text-xs md:text-sm text-[#4A4A4A] mt-1 font-bold">
-                {selectedFile ? (
-                  `Payload Size: ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB — Ready to submit`
-                ) : selectedFolderFiles.length > 0 ? (
-                  `${selectedFolderFiles.length} FILES DISCOVERED (${(totalFolderSize / 1024 / 1024).toFixed(2)} MB) — Ready to analyze`
-                ) : (
-                  'Submit your repository as a .zip file or select the entire source folder'
-                )}
-              </p>
-            </div>
+        {/* GitHub Repo Mode */}
+        {intakeMode === 'GITHUB' ? (
+          <div className="border-3 border-[#171717] bg-[#F5F1E8] p-8 md:p-10 text-center relative shadow-[4px_4px_0px_#171717]">
+            <div className="flex flex-col items-center justify-center gap-4 max-w-xl mx-auto">
+              <div className="w-16 h-16 bg-[#171717] text-[#8ED8B0] border-2 border-[#171717] flex items-center justify-center shadow-[4px_4px_0px_#3157D5]">
+                <GitBranch className="w-8 h-8" />
+              </div>
 
-            {/* Quick Picker Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
-              <BrutalistButton
-                type="button"
-                variant="caution"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                📁 SELECT .ZIP ARCHIVE
-              </BrutalistButton>
-              <BrutalistButton
-                type="button"
-                variant="lavender"
-                size="sm"
-                onClick={() => folderInputRef.current?.click()}
-              >
-                📂 SELECT ENTIRE FOLDER
-              </BrutalistButton>
-            </div>
+              <div>
+                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-[#171717]">
+                  SUBMIT PUBLIC GITHUB REPOSITORY
+                </h3>
+                <p className="font-mono text-xs md:text-sm text-[#4A4A4A] mt-1 font-bold">
+                  Provide a link to any public repository on GitHub for automated static analysis
+                </p>
+              </div>
 
+              <div className="w-full mt-2">
+                <div className="relative flex items-center">
+                  <LinkIcon className="w-5 h-5 absolute left-3 text-[#171717] pointer-events-none" />
+                  <input
+                    type="text"
+                    value={githubUrl}
+                    onChange={(e) => {
+                      setGithubUrl(e.target.value);
+                      setErrorMsg(null);
+                    }}
+                    placeholder="https://github.com/owner/repository"
+                    className="w-full bg-white border-3 border-[#171717] pl-10 pr-4 py-3 font-mono text-sm font-bold text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#3157D5] shadow-[3px_3px_0px_#171717]"
+                  />
+                </div>
+              </div>
 
-            <div className="flex flex-wrap justify-center gap-2 mt-3">
-              <span className="font-mono text-[11px] bg-white px-2 py-1 border border-[#171717] font-bold shadow-[2px_2px_0px_#171717]">
-                MAX: 250 MB
-              </span>
-              <span className="font-mono text-[11px] bg-[#8ED8B0] text-[#171717] px-2 py-1 border border-[#171717] font-bold shadow-[2px_2px_0px_#171717]">
-                AUTO-IGNORES: NODE_MODULES, .GIT, BUILD
-              </span>
-              <span className="font-mono text-[11px] bg-[#B8A7E8] text-[#171717] px-2 py-1 border border-[#171717] font-bold shadow-[2px_2px_0px_#171717]">
-                STATIC AST ONLY
-              </span>
+              <div className="flex flex-wrap justify-center gap-2 mt-2">
+                <span className="font-mono text-[11px] bg-white px-2 py-1 border border-[#171717] font-bold shadow-[2px_2px_0px_#171717]">
+                  FORMAT: HTTPS://GITHUB.COM/OWNER/REPO
+                </span>
+                <span className="font-mono text-[11px] bg-[#8ED8B0] text-[#171717] px-2 py-1 border border-[#171717] font-bold shadow-[2px_2px_0px_#171717]">
+                  PUBLIC REPOSITORIES ONLY
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          /* Dropzone Area */
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`border-3 border-dashed transition-all p-8 md:p-10 text-center relative ${
+              isDragging
+                ? 'border-[#3157D5] bg-[#3157D5]/10 scale-[0.99]'
+                : 'border-[#171717] bg-[#F5F1E8] hover:bg-[#EBE5D8]'
+            }`}
+          >
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 bg-[#171717] text-white border-2 border-[#171717] flex items-center justify-center shadow-[4px_4px_0px_#3157D5]">
+                {selectedFolderFiles.length > 0 ? (
+                  <Folder className="w-8 h-8 text-[#8ED8B0]" />
+                ) : selectedFile ? (
+                  <FileArchive className="w-8 h-8 text-[#F4C542]" />
+                ) : (
+                  <UploadCloud className="w-8 h-8 text-[#F4C542]" />
+                )}
+              </div>
+
+              <div>
+                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-[#171717]">
+                  {selectedFile ? (
+                    `ZIP ARCHIVE: ${selectedFile.name}`
+                  ) : selectedFolderFiles.length > 0 ? (
+                    `FOLDER SELECTED: ${folderName}`
+                  ) : (
+                    'DROP CODEBASE ARCHIVE OR FOLDER HERE'
+                  )}
+                </h3>
+                <p className="font-mono text-xs md:text-sm text-[#4A4A4A] mt-1 font-bold">
+                  {selectedFile ? (
+                    `Payload Size: ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB — Ready to submit`
+                  ) : selectedFolderFiles.length > 0 ? (
+                    `${selectedFolderFiles.length} FILES DISCOVERED (${(totalFolderSize / 1024 / 1024).toFixed(2)} MB) — Ready to analyze`
+                  ) : (
+                    'Submit your repository as a .zip file or select the entire source folder'
+                  )}
+                </p>
+              </div>
+
+              {/* Quick Picker Buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
+                <BrutalistButton
+                  type="button"
+                  variant="caution"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  📁 SELECT .ZIP ARCHIVE
+                </BrutalistButton>
+                <BrutalistButton
+                  type="button"
+                  variant="lavender"
+                  size="sm"
+                  onClick={() => folderInputRef.current?.click()}
+                >
+                  📂 SELECT ENTIRE FOLDER
+                </BrutalistButton>
+              </div>
+
+
+              <div className="flex flex-wrap justify-center gap-2 mt-3">
+                <span className="font-mono text-[11px] bg-white px-2 py-1 border border-[#171717] font-bold shadow-[2px_2px_0px_#171717]">
+                  MAX: 250 MB
+                </span>
+                <span className="font-mono text-[11px] bg-[#8ED8B0] text-[#171717] px-2 py-1 border border-[#171717] font-bold shadow-[2px_2px_0px_#171717]">
+                  AUTO-IGNORES: NODE_MODULES, .GIT, BUILD
+                </span>
+                <span className="font-mono text-[11px] bg-[#B8A7E8] text-[#171717] px-2 py-1 border border-[#171717] font-bold shadow-[2px_2px_0px_#171717]">
+                  STATIC AST ONLY
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Action Controls */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -284,7 +390,7 @@ export function CaseDropzone() {
           </div>
 
           <div className="w-full sm:w-auto flex items-center gap-3">
-            {(selectedFile || selectedFolderFiles.length > 0) && (
+            {(selectedFile || selectedFolderFiles.length > 0 || githubUrl.length > 0) && (
               <BrutalistButton
                 type="button"
                 variant="secondary"
@@ -293,6 +399,7 @@ export function CaseDropzone() {
                   setSelectedFile(null);
                   setSelectedFolderFiles([]);
                   setFolderName('');
+                  setGithubUrl('');
                   setSummary(null);
                   setErrorMsg(null);
                   if (fileInputRef.current) fileInputRef.current.value = '';
@@ -306,13 +413,14 @@ export function CaseDropzone() {
               type="button"
               variant="cobalt"
               size="md"
-              disabled={(!selectedFile && selectedFolderFiles.length === 0) || isUploading}
+              disabled={(intakeMode === 'GITHUB' ? !githubUrl.trim() : (!selectedFile && selectedFolderFiles.length === 0)) || isUploading}
               onClick={handleUpload}
             >
               {isUploading ? 'ANALYZING...' : 'HAND OVER THE EVIDENCE.'}
             </BrutalistButton>
           </div>
         </div>
+
 
         {/* Upload Progress Bar */}
         {isUploading && (

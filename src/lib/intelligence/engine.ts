@@ -14,7 +14,9 @@ import { detectEntryPoints } from './entry-point-detector';
 import { buildProjectBrain } from './brain-builder';
 import { classifyProjectCharacteristics } from './project-classifier';
 import { detectEvidenceConflicts } from './conflict-detector';
+import { analyzeReadme } from './readme-analyzer';
 import { emitProjectEvent } from '../events/project-events';
+
 import { FileAnalysisResult } from '../types/intelligence';
 import { AnalysisCache } from '../performance/cache';
 import { PipelineProfiler } from '../performance/profiler';
@@ -364,7 +366,9 @@ export async function runCodeIntelligencePipeline(
   const allEnvVars = analyses.flatMap((a) => a.envVars);
   const allDbEvidence = analyses.flatMap((a) => a.dbEvidence);
 
-  // 12. Build Project Brain
+  // 12. Analyze Primary README & Build Project Brain
+  const readmeAnalysis = analyzeReadme(docFiles);
+
   const brain = buildProjectBrain(
     {
       caseNumber: project.caseNumber,
@@ -380,8 +384,10 @@ export async function runCodeIntelligencePipeline(
     resolvedDependencies.length,
     unresolvedCount,
     ambiguousCount,
-    conflicts
+    conflicts,
+    readmeAnalysis
   );
+
 
   profiler.endStage('BRAIN_GENERATION_STAGE');
   profiler.startStage('FINAL_DB_UPDATE');

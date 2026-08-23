@@ -85,3 +85,51 @@ export interface TraversalResult {
   truncated: boolean;
   cyclesDetected: string[][];
 }
+
+export type VisualNodeType =
+  | 'PREREQUISITE'
+  | 'INSTALLATION'
+  | 'CONFIGURATION'
+  | 'DATABASE'
+  | 'BUILD'
+  | 'EXECUTION'
+  | 'FRONTEND'
+  | 'BACKEND'
+  | 'API'
+  | 'SERVICE'
+  | 'DATABASE_NODE'
+  | 'EXTERNAL'
+  | 'ENTRY_POINT';
+
+export interface VisualFlowNode {
+  id: string;
+  title: string;
+  subtitle?: string;
+  type: VisualNodeType;
+  stepNumber?: number;
+  status: 'CONFIRMED' | 'DISCREPANCY' | 'UNDOCUMENTED' | 'OPTIONAL';
+  command?: string;
+  packageManager?: string;
+  description: string;
+  evidence: string;
+  discrepancyWarning?: string;
+}
+
+export interface VisualFlowEdge {
+  id: string;
+  source: string;
+  target: string;
+  label?: string;
+  relationship?: string;
+}
+
+export interface VisualFlowDiagram {
+  projectId: string;
+  title: string;
+  type: 'ARCHITECTURE_FLOW' | 'INSTALLATION_EXECUTION_FLOW';
+  description: string;
+  nodes: VisualFlowNode[];
+  edges: VisualFlowEdge[];
+  warnings?: string[];
+}
+

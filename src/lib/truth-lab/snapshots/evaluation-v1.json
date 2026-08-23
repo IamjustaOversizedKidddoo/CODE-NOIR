@@ -1,6 +1,6 @@
 {
-  "runId": "RUN-1787044218297",
-  "timestamp": "2026-08-18T09:10:18.736Z",
+  "runId": "RUN-1787473491362",
+  "timestamp": "2026-08-23T08:24:52.874Z",
   "overallPassed": true,
   "metrics": {
     "factualAccuracy": 1,
@@ -81,5 +81,5 @@
     }
   },
   "failureDossiers": [],
-  "benchmarkProjectId": "cmsyfzjrs0000v5f0xozohzy6"
+  "benchmarkProjectId": "cmt5jkd060000v5u8wmkzmlfi"
 }

@@ -188,6 +188,34 @@ export interface ProjectBrainSubsystem {
   }[];
 }
 
+export interface ReadmeSection {
+  title: string;
+  content: string;
+}
+
+export interface ReadmeAnalysis {
+  filePath?: string;
+  found: boolean;
+  projectName?: string;
+  purpose?: string;
+  description?: string;
+  features: string[];
+  techStack: string[];
+  prerequisites: string[];
+  installationSteps: string[];
+  dependencyInstructions: string[];
+  configuration: string[];
+  environmentVariables: string[];
+  databaseSetup: string[];
+  runCommands: string[];
+  buildCommands: string[];
+  testingInstructions: string[];
+  deploymentInfo: string[];
+  warningsAndNotes: string[];
+  sections: ReadmeSection[];
+  undocumentedAspects: string[];
+}
+
 export interface ProjectBrain {
   identity: {
     caseNumber: string;
@@ -226,4 +254,6 @@ export interface ProjectBrain {
     docFile: string;
     codeFile: string;
   }[];
+  readmeAnalysis?: ReadmeAnalysis;
 }
+

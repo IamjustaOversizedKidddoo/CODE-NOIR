@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StatusStamp } from './StatusStamp';
+import { VisualFlowDiagrams } from './VisualFlowDiagrams';
+
 import {
   FileText,
   Sparkles,
@@ -102,6 +104,22 @@ export const CaseBriefReport: React.FC<CaseBriefReportProps> = ({
     router.push(`/cases/${caseId}/interrogate?prompt=${encodeURIComponent(question)}`);
   };
 
+  // Parse brainJson for structured README evidence and conflicts
+  const brain = project?.brainJson
+    ? typeof project.brainJson === 'string'
+      ? (() => {
+          try {
+            return JSON.parse(project.brainJson);
+          } catch {
+            return null;
+          }
+        })()
+      : project.brainJson
+    : null;
+
+  const readme = brain?.readmeAnalysis;
+  const conflicts = brain?.conflicts || [];
+
   return (
     <div className="space-y-8 font-mono text-[#171717]">
       {/* SECTION 1 — CASE INTRODUCTION */}
@@ -179,7 +197,141 @@ export const CaseBriefReport: React.FC<CaseBriefReportProps> = ({
         </div>
       </section>
 
+      {/* SECTION 1.5 — README EVIDENCE & REPOSITORY ANALYSIS DOSSIER */}
+      {readme && (
+        <section className="bg-white border-3 border-[#171717] p-6 shadow-[6px_6px_0px_#171717] space-y-4">
+          <div className="flex items-center justify-between border-b-2 border-[#171717] pb-2 flex-wrap gap-2">
+            <h3 className="text-sm font-black text-[#171717] uppercase tracking-wider flex items-center gap-2">
+              <FileText className="w-4 h-4 text-[#3157D5]" />
+              SECTION 1.5 // 📜 README & REPOSITORY EXPLANATION DOSSIER
+            </h3>
+            {readme.found && (
+              <span className="text-[10px] bg-[#8ED8B0] text-[#171717] px-2 py-0.5 font-black border border-[#171717]">
+                PRIMARY FILE: {readme.filePath || 'README.md'}
+              </span>
+            )}
+          </div>
+
+          {!readme.found ? (
+            <div className="bg-[#FFF4F2] border-2 border-[#F27661] p-4 text-xs font-mono text-[#171717] space-y-1">
+              <span className="font-black text-[#F27661] uppercase flex items-center gap-1">
+                <AlertTriangle className="w-4 h-4" /> NO README FILE DETECTED IN REPOSITORY
+              </span>
+              <p className="font-sans text-xs">
+                This repository does not contain a primary README file. CODE NOIR reconstructed the project model entirely via deterministic AST parsing, entry point analysis, and code imports.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4 font-mono text-xs">
+              {/* Purpose & Description */}
+              {readme.purpose && (
+                <div className="bg-[#F5F1E8] p-4 border-2 border-[#171717] space-y-1">
+                  <span className="text-[10px] text-[#3157D5] font-black uppercase block">
+                    PROJECT PURPOSE (EXTRACTED FROM README)
+                  </span>
+                  <p className="font-sans font-medium text-xs text-[#171717] leading-relaxed">
+                    {readme.purpose}
+                  </p>
+                </div>
+              )}
+
+              {/* Grid: Features, Tech Stack, Commands */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Features */}
+                <div className="bg-[#FAF8F5] p-3.5 border-2 border-[#171717] space-y-2">
+                  <span className="text-[10px] text-[#171717] font-black uppercase flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-[#F4C542]" /> DOCUMENTED FEATURES
+                  </span>
+                  {readme.features && readme.features.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-1 text-[11px] font-sans">
+                      {readme.features.slice(0, 6).map((feat: string, idx: number) => (
+                        <li key={idx} className="truncate">{feat}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-[10px] text-zinc-500 italic">Not documented in README</p>
+                  )}
+                </div>
+
+                {/* Installation & Commands */}
+                <div className="bg-[#FAF8F5] p-3.5 border-2 border-[#171717] space-y-2">
+                  <span className="text-[10px] text-[#171717] font-black uppercase flex items-center gap-1">
+                    <Package className="w-3.5 h-3.5 text-[#3157D5]" /> INSTALLATION & COMMANDS
+                  </span>
+                  <div className="space-y-1.5 font-mono text-[10px]">
+                    <div>
+                      <span className="text-zinc-500 font-bold block">DEPENDENCY / INSTALL:</span>
+                      {readme.dependencyInstructions && readme.dependencyInstructions.length > 0 ? (
+                        <code className="bg-[#171717] text-[#8ED8B0] px-2 py-0.5 block truncate">
+                          {readme.dependencyInstructions[0]}
+                        </code>
+                      ) : (
+                        <span className="text-zinc-400 italic">Not documented in README</span>
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-zinc-500 font-bold block">RUN / EXECUTE:</span>
+                      {readme.runCommands && readme.runCommands.length > 0 ? (
+                        <code className="bg-[#171717] text-[#F4C542] px-2 py-0.5 block truncate">
+                          {readme.runCommands[0]}
+                        </code>
+                      ) : (
+                        <span className="text-zinc-400 italic">Not documented in README</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Undocumented Aspects */}
+              {readme.undocumentedAspects && readme.undocumentedAspects.length > 0 && (
+                <div className="bg-white p-3 border-2 border-[#171717]/40 space-y-1">
+                  <span className="text-[10px] text-zinc-500 font-black uppercase block">
+                    UNDOCUMENTED ASPECTS (NOT FOUND IN README)
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {readme.undocumentedAspects.map((aspect: string, idx: number) => (
+                      <span key={idx} className="text-[9px] bg-zinc-100 text-zinc-600 px-2 py-0.5 border border-zinc-300 font-bold">
+                        {aspect}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Surface README vs Code Discrepancies (Conflicts) */}
+          {conflicts.length > 0 && (
+            <div className="bg-[#FFF4F2] border-2 border-[#F27661] p-4 space-y-2 mt-4">
+              <span className="text-xs font-black text-[#F27661] uppercase tracking-wider flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4" /> 🚨 DISCREPANCY DETECTED: README VS CODE REALITY ({conflicts.length})
+              </span>
+              <div className="space-y-2 font-mono text-xs">
+                {conflicts.map((conf: any, idx: number) => (
+                  <div key={conf.id || idx} className="bg-white p-3 border border-[#F27661] space-y-1">
+                    <div className="font-bold text-[#F27661] text-[11px] uppercase">
+                      {conf.type} ({conf.docFile})
+                    </div>
+                    <div className="text-[11px] text-zinc-700">
+                      <strong>README Claim:</strong> &quot;{conf.docClaim}&quot;
+                    </div>
+                    <div className="text-[11px] text-[#3157D5]">
+                      <strong>Code Reality:</strong> {conf.codeReality}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* VISUAL FLOW DIAGRAMS (ARCHITECTURE CONNECTION FLOW & INSTALLATION EXECUTION FLOW) */}
+      <VisualFlowDiagrams caseId={caseId} project={project} />
+
       {/* SECTION 2 — THE BIG PICTURE (VISUAL HIERARCHY) */}
+
       <section className="bg-white border-3 border-[#171717] p-6 shadow-[6px_6px_0px_#171717] space-y-4">
         <h3 className="text-sm font-black text-[#3157D5] uppercase tracking-wider flex items-center gap-2 border-b-2 border-[#171717] pb-2">
           <Layers className="w-4 h-4 text-[#3157D5]" />

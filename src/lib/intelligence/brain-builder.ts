@@ -6,6 +6,7 @@ import {
   DetectedEntryPoint,
   FileAnalysisResult,
   DirectedProjectGraph,
+  ReadmeAnalysis,
 } from '../types/intelligence';
 
 export function buildProjectBrain(
@@ -23,8 +24,10 @@ export function buildProjectBrain(
   dependenciesCount: number,
   unresolvedImports: number,
   ambiguousImports: number,
-  conflicts: any[] = []
+  conflicts: any[] = [],
+  readmeAnalysis?: ReadmeAnalysis
 ): ProjectBrain {
+
   // 1. Group files by top-level subsystems / directories
   const directoryMap = new Map<string, { name: string; files: string[]; symbolCount: number }[]>();
 
@@ -111,5 +114,7 @@ export function buildProjectBrain(
       unsupportedAreas,
     },
     conflicts,
+    readmeAnalysis,
   };
 }
+

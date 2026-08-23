@@ -9,6 +9,7 @@ import { runCodeIntelligencePipeline } from '../intelligence/engine';
 import { runSecurityAudit } from '../security/scanner';
 import { IngestionSecurityError, sanitizeRelativePath, assertPathInsideJail } from './security-guard';
 import { IngestionResult, DiscoveredFileInfo } from '../types/project';
+import { fetchGitHubRepositoryZipball } from './github-fetcher';
 
 function generateCaseNumber(): string {
   const year = new Date().getFullYear();
@@ -407,4 +408,25 @@ export async function runDirectFilesIngestionPipeline(
     throw error;
   }
 }
+
+/**
+ * Runs the safe ingestion pipeline for a public GitHub repository URL.
+ */
+export async function runGitHubIngestionPipeline(
+  githubUrl: string,
+  options?: RunIngestionOptions
+): Promise<IngestionResult> {
+  const config = getIngestionConfig();
+  const { buffer, repoInfo } = await fetchGitHubRepositoryZipball(githubUrl, config.maxExtractedBytes);
+
+  const projectName = options?.projectName || `${repoInfo.owner}/${repoInfo.repo}`;
+  const metadataDesc = `Source: GitHub | Repository: ${repoInfo.owner}/${repoInfo.repo} | URL: ${repoInfo.fullUrl}${repoInfo.ref ? ` | Ref: ${repoInfo.ref}` : ''}`;
+  const description = options?.description ? `${options.description} (${metadataDesc})` : metadataDesc;
+
+  return runZipIngestionPipeline(buffer, {
+    projectName,
+    description,
+  });
+}
+
 

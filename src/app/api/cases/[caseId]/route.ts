@@ -47,11 +47,19 @@ export async function GET(
         status: project.status,
         statusMessage: project.statusMessage,
         progress: project.progress,
+        brainJson: project.brainJson,
+        techStack: project.techStack,
+        manifestsJson: project.manifestsJson,
+        entryPoints: project.entryPoints,
+        envVarsJson: project.envVarsJson,
+        endpointsJson: project.endpointsJson,
+        dbEvidenceJson: project.dbEvidenceJson,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
         recentEvents: project.events,
       },
     });
+
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to retrieve case.', code: 'SERVER_ERROR' },

@@ -1,22 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { runZipIngestionPipeline, runDirectFilesIngestionPipeline, DirectFileInput } from '@/lib/ingestion/pipeline';
+import {
+  runZipIngestionPipeline,
+  runDirectFilesIngestionPipeline,
+  runGitHubIngestionPipeline,
+  DirectFileInput,
+} from '@/lib/ingestion/pipeline';
 import { IngestionSecurityError } from '@/lib/ingestion/security-guard';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const projectName = (formData.get('projectName') as string | null) || undefined;
+    const contentType = req.headers.get('content-type') || '';
+    let githubUrl: string | undefined = undefined;
+    let projectName: string | undefined = undefined;
+    let singleArchive: File | null = null;
+    let multiFiles: File[] = [];
+    let multiPaths: string[] = [];
 
-    // 1. Check for single archive (.zip) upload
-    const singleArchive = (formData.get('archive') || formData.get('file') || formData.get('zip')) as File | null;
+    if (contentType.includes('application/json')) {
+      const body = await req.json();
+      githubUrl = body.githubUrl;
+      projectName = body.projectName;
+    } else {
+      const formData = await req.formData();
+      projectName = (formData.get('projectName') as string | null) || undefined;
+      githubUrl = (formData.get('githubUrl') as string | null) || undefined;
 
-    // 2. Check for multi-file folder upload
-    const multiFiles = (formData.getAll('files') as File[]).filter((f) => f && typeof f === 'object' && f.name);
-    const multiPaths = (formData.getAll('paths') as string[]) || [];
+      singleArchive = (formData.get('archive') || formData.get('file') || formData.get('zip')) as File | null;
+      multiFiles = (formData.getAll('files') as File[]).filter((f) => f && typeof f === 'object' && f.name);
+      multiPaths = (formData.getAll('paths') as string[]) || [];
+    }
 
-    // Case A: Single ZIP Archive
+    // Case A: GitHub Repository Link
+    if (githubUrl && githubUrl.trim().length > 0) {
+      const result = await runGitHubIngestionPipeline(githubUrl.trim(), {
+        projectName,
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          caseId: result.projectId,
+          caseNumber: result.caseNumber,
+          summary: {
+            totalFiles: result.totalFiles,
+            includedFiles: result.includedFiles,
+            ignoredFiles: result.ignoredFiles,
+            totalLines: result.totalLines,
+            totalBytes: result.totalBytes,
+            primaryLang: result.primaryLang,
+          },
+        },
+        { status: 201 }
+      );
+    }
+
+    // Case B: Single ZIP Archive
     if (singleArchive && singleArchive.size > 0 && (singleArchive.name.toLowerCase().endsWith('.zip') || multiFiles.length === 0)) {
       const arrayBuffer = await singleArchive.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
@@ -54,7 +94,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Case B: Multi-file Folder Upload
+    // Case C: Multi-file Folder Upload
     if (multiFiles.length > 0) {
       const directInputs: DirectFileInput[] = [];
 
@@ -93,15 +133,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // No files detected
+    // No valid input detected
     return NextResponse.json(
       {
         success: false,
-        error: 'No evidence archive or files submitted. Please select a .zip archive or project folder.',
+        error: 'No evidence provided. Please enter a public GitHub URL, select a .zip archive, or select a project folder.',
         code: 'NO_FILE_PROVIDED',
       },
       { status: 400 }
     );
+
   } catch (error: any) {
     console.error('[API /api/upload Error]', error);
 
