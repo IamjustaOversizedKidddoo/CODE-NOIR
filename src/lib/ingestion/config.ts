@@ -9,8 +9,14 @@ export interface IngestionConfig {
 }
 
 export function getIngestionConfig(): IngestionConfig {
+  const defaultStorage = process.env.VERCEL
+    ? path.join('/tmp', '.storage')
+    : path.join(process.cwd(), '.storage');
+
   return {
-    storageRoot: path.join(/*turbopackIgnore: true*/ process.cwd(), process.env.STORAGE_ROOT || '.storage'),
+    storageRoot: process.env.STORAGE_ROOT
+      ? path.resolve(process.env.STORAGE_ROOT)
+      : defaultStorage,
     maxExtractedBytes: parseInt(
       process.env.MAX_EXTRACTED_BYTES || '262144000',
       10
