@@ -1,6 +1,7 @@
 ﻿import path from 'path';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSql } from '@prisma/adapter-libsql';
+import { createClient } from '@libsql/client';
+import { PrismaLibSQL } from '@prisma/adapter-libsql';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -22,11 +23,12 @@ function createPrismaClient(): PrismaClient {
     !!process.env.TURSO_DATABASE_URL;
 
   if (isTurso) {
-    const adapter = new PrismaLibSql({
+    const libsql = createClient({
       url: process.env.TURSO_DATABASE_URL!,
       authToken: process.env.TURSO_AUTH_TOKEN,
     });
-    return new PrismaClient({ adapter, log: ['error'] } as any);
+    const adapter = new PrismaLibSQL(libsql);
+    return new PrismaClient({ adapter, log: ['error'] });
   }
 
   // Local development — absolute path so CLI and runtime open the same file.
