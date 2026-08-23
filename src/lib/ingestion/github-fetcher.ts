@@ -19,7 +19,14 @@ export function parseGitHubUrl(rawUrl: string): GitHubRepoInfo {
     throw new IngestionSecurityError('Empty or invalid GitHub URL provided.', 'INVALID_GITHUB_URL');
   }
 
-  const trimmed = rawUrl.trim();
+  let trimmed = rawUrl.trim();
+
+  // Auto-prefix missing scheme for bare domain URLs
+  if (!/^https?:\/\//i.test(trimmed)) {
+    if (trimmed.toLowerCase().startsWith('github.com/') || trimmed.toLowerCase().startsWith('www.github.com/')) {
+      trimmed = `https://${trimmed}`;
+    }
+  }
 
   // Basic sanity check against SSRF and non-HTTPS/non-GitHub protocols
   if (!trimmed.startsWith('https://github.com/') && !trimmed.startsWith('https://www.github.com/')) {
@@ -44,8 +51,8 @@ export function parseGitHubUrl(rawUrl: string): GitHubRepoInfo {
     let repo = pathSegments[1].replace(/\.git$/i, '');
     let ref: string | undefined = undefined;
 
-    if (pathSegments.length >= 4 && pathSegments[2] === 'tree') {
-      ref = pathSegments.slice(3).join('/');
+    if (pathSegments.length >= 4 && (pathSegments[2] === 'tree' || pathSegments[2] === 'blob')) {
+      ref = pathSegments[3];
     }
 
     // Validate characters to prevent injection
@@ -80,18 +87,20 @@ export async function fetchGitHubRepositoryZipball(
   const { owner, repo, ref } = repoInfo;
 
   // Candidate download URLs in order of precedence:
-  // 1. If explicit ref provided (e.g. branch/tag), use codeload for that ref.
-  // 2. Otherwise try codeload for 'main', 'master', and fallback to 'HEAD'.
+  // 1. If explicit ref provided (e.g. branch/tag), try codeload and GitHub API zipball.
+  // 2. Otherwise try codeload for 'main', 'master', 'HEAD', and fallback to GitHub default branch zipball.
   const candidateUrls: string[] = [];
 
   if (ref) {
     candidateUrls.push(`https://codeload.github.com/${owner}/${repo}/zip/refs/heads/${ref}`);
     candidateUrls.push(`https://codeload.github.com/${owner}/${repo}/zip/refs/tags/${ref}`);
     candidateUrls.push(`https://codeload.github.com/${owner}/${repo}/zip/${ref}`);
+    candidateUrls.push(`https://api.github.com/repos/${owner}/${repo}/zipball/${ref}`);
   } else {
     candidateUrls.push(`https://codeload.github.com/${owner}/${repo}/zip/refs/heads/main`);
     candidateUrls.push(`https://codeload.github.com/${owner}/${repo}/zip/refs/heads/master`);
     candidateUrls.push(`https://codeload.github.com/${owner}/${repo}/zip/HEAD`);
+    candidateUrls.push(`https://api.github.com/repos/${owner}/${repo}/zipball`);
   }
 
   let lastError: Error | null = null;

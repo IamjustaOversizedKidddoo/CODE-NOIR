@@ -9,6 +9,7 @@ import {
 import { IngestionSecurityError } from '@/lib/ingestion/security-guard';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {

@@ -26,7 +26,7 @@ export interface StateTransitionValidation {
  * Enforces logical pipeline progression and prevents invalid jumping.
  */
 const VALID_TRANSITIONS: Record<ProjectStatus, readonly ProjectStatus[]> = {
-  CREATED: ['UPLOADING', 'EXTRACTING', 'ERROR', 'DELETED'],
+  CREATED: ['UPLOADING', 'EXTRACTING', 'DISCOVERING', 'ERROR', 'DELETED'],
   UPLOADING: ['EXTRACTING', 'ERROR', 'DELETED'],
   EXTRACTING: ['DISCOVERING', 'ERROR', 'DELETED'],
   DISCOVERING: ['PARSING', 'READY', 'ERROR', 'DELETED'], // Can jump to READY if ingestion-only phase

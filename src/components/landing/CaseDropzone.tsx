@@ -259,17 +259,17 @@ export function CaseDropzone() {
   };
 
   const handleUpload = async () => {
-    const isGitHubSubmission = intakeMode === 'GITHUB' || (githubUrl.trim().length > 0 && !selectedFile && selectedFolderFiles.length === 0);
+    const isGitHubSubmission = intakeMode === 'GITHUB';
     const hasZip = Boolean(selectedFile);
     const hasFolder = selectedFolderFiles.length > 0;
 
-    if (!isGitHubSubmission && !hasZip && !hasFolder) {
-      setErrorMsg('No evidence submitted. Please enter a public GitHub repository URL, select a .zip archive, or select a project folder.');
+    if (isGitHubSubmission && !githubUrl.trim()) {
+      setErrorMsg('Please enter a valid public GitHub repository URL.');
       return;
     }
 
-    if (isGitHubSubmission && !githubUrl.trim()) {
-      setErrorMsg('Please enter a valid public GitHub repository URL.');
+    if (!isGitHubSubmission && !hasZip && !hasFolder) {
+      setErrorMsg('No evidence submitted. Please select a .zip archive or select a project folder.');
       return;
     }
 
