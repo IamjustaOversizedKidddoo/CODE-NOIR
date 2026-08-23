@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import path from 'path';
-import prisma from '../db';
+import prisma, { ensureDatabaseSchema } from '../db';
 import { getIngestionConfig } from './config';
 import { safelyExtractZip } from './safe-zip-extractor';
 import { discoverFiles } from './file-discoverer';
@@ -73,6 +73,7 @@ export async function runZipIngestionPipeline(
   const projectName = options?.projectName || `Evidence Archive ${caseNumber}`;
 
   // 1. Initialize Project Record in DB
+  await ensureDatabaseSchema();
   const project = await prisma.project.create({
     data: {
       caseNumber,
@@ -254,6 +255,7 @@ export async function runDirectFilesIngestionPipeline(
     );
   }
 
+  await ensureDatabaseSchema();
   const project = await prisma.project.create({
     data: {
       caseNumber,

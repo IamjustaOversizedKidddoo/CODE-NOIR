@@ -15,13 +15,11 @@ export function validateEnvironment(): EnvironmentConfigReport {
   const errors: string[] = [];
 
   // 1. Database Configuration (Required)
+  if (!process.env.DATABASE_URL || process.env.DATABASE_URL.trim() === '') {
+    process.env.DATABASE_URL = process.env.VERCEL ? 'file:/tmp/dev.db' : 'file:./dev.db';
+  }
   const databaseUrl = process.env.DATABASE_URL;
   const databaseConfigured = Boolean(databaseUrl && databaseUrl.trim().length > 0);
-  if (!databaseConfigured) {
-    errors.push(
-      'DATABASE_URL is missing. Please define DATABASE_URL in .env (e.g. file:./dev.db) to initialize SQLite / PostgreSQL.'
-    );
-  }
 
   // 2. AI Provider Configurations (Groq & Gemini)
   const configuredProvider = (process.env.AI_PROVIDER || '').toLowerCase();

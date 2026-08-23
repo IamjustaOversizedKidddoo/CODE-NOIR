@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ensureDatabaseSchema } from '@/lib/db';
 import {
   runZipIngestionPipeline,
   runDirectFilesIngestionPipeline,
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    await ensureDatabaseSchema();
     const contentType = req.headers.get('content-type') || '';
     let githubUrl: string | undefined = undefined;
     let projectName: string | undefined = undefined;
