@@ -128,6 +128,14 @@ export async function processInterrogationMessage(
     confidence = 'UNKNOWN';
   }
 
+  // --- INTENT: OFF_TOPIC (STRICT FOLDER SCOPE GUARD) ---
+  else if (intent === 'OFF_TOPIC') {
+    session.currentTopic = 'OFF_TOPIC';
+    const projName = project?.name || 'Uploaded Case Dossier';
+    rawFact = `🕵️ **CASE SCOPE BOUNDARY // CLASSIFIED DOSSIER ONLY**\n\nHold on, Detective. My assignment is strictly bounded to the evidence inside this uploaded case file (**${projName}**). I don't answer general trivia, recipes, or topics outside this codebase.\n\nInside this repository, I can answer **anything** regarding this folder:\n- 📁 **File & Directory Structure**: What each file and directory does\n- 🚪 **Entry Points & Execution**: Where the application starts and how data flows\n- 🔍 **Function & Symbol Logic**: Caller/callee chains, dependencies, and blast radius\n- ⚡ **Tech Stack & Environment**: Frameworks, packages, API endpoints, and DB models\n- 🛡️ **Security Audit**: Vulnerabilities, secrets, and path safety\n\nWhat component of **${projName}** shall we investigate?`;
+    confidence = 'CONFIRMED';
+  }
+
   // --- INTENT: CASUAL / GREETING ---
   else if (intent === 'CASUAL') {
     session.currentTopic = 'GREETING';

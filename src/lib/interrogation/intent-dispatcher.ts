@@ -1,7 +1,31 @@
 import { InterrogationIntent } from './types';
 
+export function isOffTopicQuery(query: string): boolean {
+  if (!query || typeof query !== 'string') return false;
+  const q = query.trim().toLowerCase();
+
+  const offTopicKeywords = [
+    'weather', 'capital of', 'recipe', 'cook ', 'bake ', 'chocolate cake',
+    'president', 'prime minister', 'football', 'basketball', 'cricket',
+    'movie', 'actor', 'actress', 'song', 'singer', 'tell me a joke', 'tell a joke',
+    'horoscope', 'zodiac', 'who won the', 'world cup', 'super bowl', 'best restaurant',
+    'flight ticket', 'crypto price', 'bitcoin price', 'stock price', 'meaning of life',
+    'write a poem', 'write an essay', 'favorite color',
+  ];
+
+  for (const kw of offTopicKeywords) {
+    if (q.includes(kw)) return true;
+  }
+
+  return false;
+}
+
 export function classifyInterrogationIntent(query: string): InterrogationIntent {
   const q = query.trim().toLowerCase().replace(/’/g, "'");
+
+  if (isOffTopicQuery(query)) {
+    return 'OFF_TOPIC';
+  }
 
   // 1. Casual / Greetings
   if (
