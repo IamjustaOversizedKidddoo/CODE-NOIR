@@ -1076,3 +1076,13 @@ CODE NOIR is built around one idea:
 `UPLOAD` · `INVESTIGATE` · `QUESTION` · `LEARN` · `UNDERSTAND`
 
 </div>
+
+## Copyright
+
+Copyright © 2026 Ayan Abbas.
+
+CODE NOIR and its original source code, architecture, design, documentation,
+and associated project materials were created by Ayan Abbas.
+
+See the [LICENSE](LICENSE) file for the terms under which this software is
+distributed.
