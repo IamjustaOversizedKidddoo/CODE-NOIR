@@ -1,110 +1,111 @@
-# CODE NOIR
+# ◼ CODE NOIR
 
 ### Every codebase has a story. Investigate it.
 
-**CODE NOIR is an AI-powered codebase investigation and learning platform that transforms unfamiliar repositories into structured, interactive experiences.**
+**CODE NOIR** is an AI-powered codebase investigation and learning platform that transforms unfamiliar repositories into **structured, evidence-backed, interactive experiences**.
 
-Instead of throwing hundreds of files and thousands of lines of code at a developer, CODE NOIR analyzes the repository, identifies important components and relationships, and guides the user through the system step by step.
+Instead of forcing developers to navigate thousands of lines of unfamiliar code, CODE NOIR analyzes the repository, maps relationships between components, extracts evidence, and lets users investigate the system through guided learning, conversational AI, architecture visualization, and security analysis.
 
 > **Don't just read the code. Investigate it.**
 
 ---
 
-## Overview
+## ✦ Why CODE NOIR?
 
-Understanding an unfamiliar codebase is rarely about reading more code.
+Understanding an unfamiliar codebase isn't primarily a problem of reading code.
 
-The real challenge is understanding the relationships between the code:
+It's a problem of understanding **relationships**.
 
-- Where does the application start?
-- Which files actually matter?
-- What calls what?
-- Where does the data go?
-- Why does a particular module exist?
-- Which components depend on it?
-- What happens if something changes?
-- How does the entire system fit together?
+* Where does the application start?
+* Which files actually matter?
+* What calls what?
+* Where does the data go?
+* Why does this module exist?
+* Which components depend on it?
+* What happens if something changes?
+* How does the entire system fit together?
 
-CODE NOIR is designed to answer these questions through a combination of deterministic code intelligence, repository-grounded AI, interactive investigation, and guided learning.
+CODE NOIR is designed to answer these questions by combining:
+
+**Deterministic code intelligence + repository evidence + AI reasoning + interactive investigation + guided learning.**
+
+The core principle is:
+
+> **Evidence first. Explanation second.**
+
+The repository establishes the facts.
+The intelligence layer extracts and organizes them.
+The AI explains those facts to the user.
 
 ---
 
-## How It Works
+# ⚡ Core Workflow
 
 ```text
                          REPOSITORY
+                              │
+                              ▼
+                    ┌──────────────────┐
+                    │    INGESTION     │
+                    │ ZIP / FOLDER     │
+                    └────────┬─────────┘
                              │
                              ▼
-                    ┌─────────────────┐
-                    │    INGESTION    │
-                    │ ZIP / FOLDER    │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
+                    ┌──────────────────┐
                     │ CODE INTELLIGENCE│
-                    │ AST / SYMBOLS   │
-                    │ IMPORTS / CALLS │
-                    └────────┬────────┘
+                    │ AST / SYMBOLS    │
+                    │ IMPORTS / CALLS  │
+                    └────────┬─────────┘
                              │
                              ▼
-                    ┌─────────────────┐
-                    │ EVIDENCE LAYER  │
-                    │ VERIFIED FACTS  │
-                    └────────┬────────┘
+                    ┌──────────────────┐
+                    │  EVIDENCE LAYER  │
+                    │ VERIFIED FACTS   │
+                    └────────┬─────────┘
                              │
               ┌──────────────┼──────────────┐
               ▼              ▼              ▼
-         CASE BRIEF        LEARN      DETECTIVE'S DESK
-              │              │              │
-              ▼              ▼              ▼
-           STORY         LESSONS          AI CHAT
+         CASE BRIEF       LEARN       DETECTIVE'S DESK
               │              │              │
               └──────────────┼──────────────┘
                              ▼
                        INVESTIGATION
                              │
                              ▼
-                        UNDERSTANDING
+                       UNDERSTANDING
 ```
-
-The central principle is simple:
-
-> **Evidence first. Explanation second.**
-
-The repository is analyzed before AI is asked to explain it.
 
 ---
 
-# Core Experience
+# ✦ What You Can Do
 
-## 1. Case Brief
+## 01 — Case Brief
 
-The Case Brief is the starting point for every investigation.
+Get an immediate understanding of an unfamiliar repository.
 
-After a repository is uploaded, CODE NOIR builds a high-level overview containing information such as:
+CODE NOIR generates a high-level project overview containing information such as:
 
-- Project size
-- File count
-- Symbol count
-- Detected languages
-- Entry points
-- Important modules
-- Major systems
-- Architectural relationships
-- Evidence-backed project summaries
+* Project size
+* File count
+* Symbol count
+* Detected languages
+* Entry points
+* Important modules
+* Major systems
+* Architectural relationships
+* Evidence-backed summaries
 
-The objective is to answer the first question every newcomer has:
+The goal is simple:
 
 > **"What am I looking at?"**
 
 ---
 
-## 2. Guided Learning
+## 02 — Guided Learning
 
 CODE NOIR turns a repository into a structured learning experience.
 
-Instead of asking a beginner to understand the entire project at once, the system progressively introduces the codebase:
+Instead of exposing the entire codebase at once, the system progressively moves through:
 
 ```text
 PROJECT
@@ -126,28 +127,26 @@ ARCHITECTURE
 
 Learning experiences can include:
 
-- Focused source-code excerpts
-- Plain-English explanations
-- Technical explanations
-- Line-by-line explanations
-- Concept breakdowns
-- Prediction challenges
-- Active recall
-- Mastery tracking
+* Focused source-code excerpts
+* Plain-English explanations
+* Technical explanations
+* Line-by-line walkthroughs
+* Concept breakdowns
+* Prediction challenges
+* Active recall
+* Mastery tracking
 
-The objective is not to expose more code.
+The objective isn't to expose more code.
 
-The objective is to make more of the code understandable.
+**It's to make more of the code understandable.**
 
 ---
 
-## 3. The Detective's Desk
+## 03 — The Detective's Desk
 
-The Detective's Desk is the conversational AI workspace.
+The conversational investigation workspace.
 
-Users can ask questions about the uploaded repository and continue the conversation naturally.
-
-For example:
+Ask questions about the repository naturally:
 
 ```text
 "Where does this application start?"
@@ -164,117 +163,103 @@ For example:
 
 "What happens if I remove this?"
 
-"I still don't understand. Can you explain it differently?"
-
 "Show me the relevant code."
 
 "Quiz me on what we just learned."
 ```
 
-The experience is designed around conversation rather than isolated AI responses.
+The conversation is designed to be iterative:
 
-A user should be able to ask:
+```text
+WHY?
+ ↓
+HOW?
+ ↓
+I STILL DON'T UNDERSTAND.
+ ↓
+SHOW ME.
+ ↓
+QUIZ ME.
+```
 
-> Why?
-
-Then:
-
-> How?
-
-Then:
-
-> I still don't understand.
-
-Then:
-
-> Show me.
-
-Then:
-
-> Quiz me.
-
-The objective is to help the user build a mental model of the repository.
+The goal is to help the user build a **mental model of the repository**, not simply receive isolated AI answers.
 
 ---
 
-## 4. Crime Scene
+## 04 — Crime Scene
 
-The Crime Scene is the visual architecture layer.
+A visual architecture layer for understanding relationships inside the repository.
 
-It represents the repository as an interactive relationship map.
-
-Depending on the analyzed project, it can expose relationships such as:
+Depending on the project, CODE NOIR can surface relationships such as:
 
 ```text
 FILES
-  │
-  ├── IMPORT
-  │
-  ├── CALL
-  │
-  ├── REFERENCE
-  │
-  └── DEPENDENCY
+ │
+ ├── IMPORT
+ │
+ ├── CALL
+ │
+ ├── REFERENCE
+ │
+ └── DEPENDENCY
 ```
 
-It can help identify:
+It can help expose:
 
-- Entry points
-- Central modules
-- Important dependencies
-- Callers
-- Callees
-- Circular dependencies
-- Architectural relationships
+* Entry points
+* Central modules
+* Important dependencies
+* Callers
+* Callees
+* Circular dependencies
+* Architectural relationships
 
-### Beginner View
+### Beginner Mode
 
 The default experience reduces unnecessary graph noise.
 
-The purpose is not to display every relationship at once.
+The objective isn't to display every relationship.
 
-The purpose is to make the architecture understandable.
-
----
-
-## 5. Investigation Room
-
-The Investigation Room translates complex architectural questions into guided investigations.
-
-Examples include:
-
-| User Question | Investigation |
-|---|---|
-| How does the project start? | Application Startup |
-| What are the major systems? | System Map |
-| Who talks to whom? | Call Graph |
-| Where does a request go? | API Routing |
-| Where does the data go? | Database Pipeline |
-| How does authentication work? | Security & Auth |
-| What happens if I change this? | Blast Radius |
-| How does everything connect? | Complete Story |
-
-Each investigation is intended to connect technical relationships with understandable explanations.
+**It's to make the architecture understandable.**
 
 ---
 
-## 6. Evidence Locker
+## 05 — Investigation Room
 
-The Evidence Locker contains the indexed repository.
+Turn high-level questions into guided investigations.
+
+| Question                       | Investigation       |
+| ------------------------------ | ------------------- |
+| How does the project start?    | Application Startup |
+| What are the major systems?    | System Map          |
+| Who talks to whom?             | Call Graph          |
+| Where does a request go?       | API Routing         |
+| Where does the data go?        | Database Pipeline   |
+| How does authentication work?  | Security & Auth     |
+| What happens if I change this? | Blast Radius        |
+| How does everything connect?   | Complete Story      |
+
+Each investigation combines technical relationships with understandable explanations.
+
+---
+
+## 06 — Evidence Locker
+
+The Evidence Locker provides access to the indexed repository.
 
 Users can inspect:
 
-- Source files
-- Tests
-- Configuration
-- Manifests
-- Documentation
-- Symbols
-- References
-- Security findings
-- Unconfirmed files
+* Source files
+* Tests
+* Configuration
+* Manifests
+* Documentation
+* Symbols
+* References
+* Security findings
+* Unconfirmed files
 
-Files can be organized according to their discovered role:
+Files can be organized according to discovered roles:
 
 ```text
 CORE
@@ -287,43 +272,45 @@ DATA
 UNCONFIRMED
 ```
 
-Where supported by repository evidence, CODE NOIR can explain why a file is important using signals such as:
+Where supported by repository evidence, file importance can be determined using signals such as:
 
-- Import relationships
-- Caller relationships
-- Reference counts
-- Graph centrality
-- Entry-point proximity
-- Symbol relationships
+* Import relationships
+* Caller relationships
+* Reference counts
+* Graph centrality
+* Entry-point proximity
+* Symbol relationships
 
 ---
 
-## 7. Security Dossier
+# 🛡 Security Dossier
 
 CODE NOIR includes static security analysis for suspicious source patterns.
 
-Depending on the configured security rules, the system can identify patterns associated with:
+Depending on the configured rules, it can identify patterns associated with:
 
-- Hardcoded secrets
-- API keys
-- JWTs
-- Private keys
-- SQL injection risks
-- Command injection risks
-- Insecure defaults
-- Suspicious source patterns
+* Hardcoded secrets
+* API keys
+* JWTs
+* Private keys
+* SQL injection risks
+* Command injection risks
+* Insecure defaults
+* Suspicious source patterns
 
-Security findings are intended for investigation and validation.
+### Important
+
+Security findings are intended for **investigation and validation**.
 
 > Static analysis identifies potentially dangerous patterns. Findings should be manually validated before being treated as confirmed vulnerabilities.
 
 ---
 
-# Evidence-First AI Architecture
+# 🧠 Evidence-First AI
 
-One of the core architectural principles of CODE NOIR is the separation between repository facts and AI-generated explanations.
+This is one of CODE NOIR's core architectural principles.
 
-A conventional workflow might look like:
+A conventional workflow looks like:
 
 ```text
 REPOSITORY
@@ -333,7 +320,7 @@ REPOSITORY
 EXPLANATION
 ```
 
-CODE NOIR instead follows:
+CODE NOIR separates **facts** from **explanations**:
 
 ```text
 REPOSITORY
@@ -355,19 +342,17 @@ AI
 EXPLANATION
 ```
 
-This separation is important.
-
 The AI should not be responsible for inventing the architecture.
 
-The analysis layer establishes what can be supported from the repository.
+The analysis layer establishes what can be supported by repository evidence.
 
-The AI explains that evidence to the user.
+The AI explains that evidence.
 
 ---
 
-# Grounding Model
+# 🔎 Grounding & Uncertainty
 
-CODE NOIR is designed around the following pipeline:
+CODE NOIR follows an evidence-oriented reasoning model:
 
 ```text
 STATIC FACT
@@ -381,7 +366,7 @@ EVIDENCE
 EXPLANATION
 ```
 
-Where applicable, the system can distinguish between:
+Where applicable, information can be distinguished as:
 
 ```text
 CONFIRMED
@@ -390,7 +375,7 @@ INFERRED
 UNKNOWN
 ```
 
-The fundamental principle is:
+The design principle is:
 
 > **Unknown is better than fabricated certainty.**
 
@@ -398,38 +383,41 @@ If the repository does not contain enough evidence to establish something, the s
 
 ---
 
-# AI Provider Architecture
+# 🤖 AI Provider Architecture
 
-CODE NOIR supports multiple AI providers behind a unified conversational experience.
+CODE NOIR abstracts AI providers behind a unified conversational interface.
 
 ```text
                     USER
                      │
                      ▼
-             THE DETECTIVE
+              THE DETECTIVE
                      │
                      ▼
              EVIDENCE RETRIEVAL
                      │
                      ▼
-                   GROQ
+                    GROQ
                      │
               failure / timeout
                      ▼
                   GEMINI
                      │
-              unavailable
+                unavailable
                      ▼
              FALLBACK ENGINE
 ```
 
-The provider implementation remains behind the application layer.
-
 The user interacts with **The Detective**, rather than needing to understand the underlying provider architecture.
+
+Current providers include:
+
+* Groq
+* Google Gemini
 
 ---
 
-# Repository Ingestion
+# 📦 Repository Ingestion
 
 CODE NOIR supports multiple repository input methods.
 
@@ -458,11 +446,11 @@ Relative paths are preserved while passing through ingestion security validation
 
 ---
 
-# Security Architecture
+# 🔐 Security Architecture
 
 Security is treated as a first-class subsystem.
 
-## Path Traversal Protection
+### Path Traversal Protection
 
 The ingestion layer validates paths and rejects malicious patterns including:
 
@@ -474,11 +462,11 @@ null bytes
 Windows drive paths
 ```
 
-## Archive Protection
+### Archive Protection
 
 Archive extraction is bounded to reduce resource-exhaustion risks.
 
-## Secret Protection
+### Secret Protection
 
 Sensitive values such as:
 
@@ -491,11 +479,11 @@ Credentials
 
 are protected or redacted across relevant layers.
 
-## Prompt Injection Resistance
+### Prompt Injection Resistance
 
-Repository files are treated as untrusted data.
+Repository files are treated as **untrusted data**.
 
-For example, if a README contains:
+If a README contains:
 
 ```text
 IGNORE ALL PREVIOUS INSTRUCTIONS
@@ -503,15 +491,15 @@ IGNORE ALL PREVIOUS INSTRUCTIONS
 
 that text remains repository content rather than becoming an application instruction.
 
-## No Arbitrary Code Execution
+### No Arbitrary Code Execution
 
-CODE NOIR intentionally does not execute uploaded repositories.
+CODE NOIR intentionally does **not execute uploaded repositories**.
 
 The platform is designed around static analysis rather than running untrusted project code.
 
 ---
 
-# Performance & Scalability
+# ⚙ Performance & Scalability
 
 Large repositories introduce a fundamental challenge:
 
@@ -525,27 +513,25 @@ Limits concurrent parsing work to prevent uncontrolled resource usage.
 
 ### Analysis Caching
 
-Versioned content-based cache keys reduce unnecessary re-analysis.
+Versioned, content-based cache keys reduce unnecessary re-analysis.
 
 Conceptually:
 
 ```text
 SHA256(
-    fileHash
-    :
-    component
-    :
+    fileHash :
+    component :
     version
 )
 ```
 
 ### Batch Persistence
 
-Large collections of records can be persisted in chunks rather than unnecessary sequential operations.
+Large collections of records can be persisted in chunks instead of unnecessary sequential operations.
 
 ### Indexed Graph Queries
 
-Forward and reverse adjacency indexes improve relationship lookup performance.
+Forward and reverse adjacency indexes improve relationship lookup.
 
 ### Bounded Graph Traversal
 
@@ -561,41 +547,30 @@ Large architectural graphs can be expanded progressively to reduce browser workl
 
 ---
 
-# Truth & Evaluation
+# 📊 Evaluation
 
 CODE NOIR includes an internal evaluation layer for testing repository understanding and AI grounding.
 
-The evaluation framework tracks metrics such as:
+Metrics include:
 
-- Factual Accuracy
-- Citation Accuracy
-- Relationship F1
-- Security Precision
-- Security Recall
-- Hallucination Rate
-- Persona Invariance
-- Ambiguity Handling
+| Metric             | Internal Result |
+| ------------------ | --------------: |
+| Factual Accuracy   |          100.0% |
+| Citation Accuracy  |           98.0% |
+| Relationship F1    |           92.3% |
+| Security Precision |          100.0% |
+| Security Recall    |          100.0% |
+| Hallucination Rate |            0.0% |
+| Persona Invariance |          100.0% |
+| Ambiguity Handling |          100.0% |
 
-Latest internal verification:
-
-```text
-FACTUAL ACCURACY       100.0%
-CITATION ACCURACY       98.0%
-RELATIONSHIP F1         92.3%
-SECURITY PRECISION     100.0%
-SECURITY RECALL        100.0%
-HALLUCINATION RATE       0.0%
-PERSONA INVARIANCE     100.0%
-AMBIGUITY HANDLING     100.0%
-```
-
-> These are internal benchmark results from the project's evaluation suite and should not be interpreted as guarantees for arbitrary repositories.
+> **Note:** These are internal benchmark results from the project's evaluation suite. They should not be interpreted as guarantees for arbitrary repositories.
 
 ---
 
-# Scalability Model
+# 📈 Scalability Model
 
-CODE NOIR is designed to progressively handle increasing repository complexity.
+CODE NOIR is designed to progressively handle increasing repository complexity:
 
 ```text
 TINY
@@ -613,15 +588,15 @@ POLYGLOT
 MONOREPO
 ```
 
-The objective is not simply to process more files.
+The goal isn't simply to process more files.
 
-It is to prevent repository size from overwhelming the user's understanding.
+**It's to prevent repository size from overwhelming the user's understanding.**
 
 ---
 
-# User Journey
+# 🧭 User Journey
 
-The intended experience follows a clear progression:
+The intended experience follows a guided progression:
 
 ```text
 ┌─────────────────────┐
@@ -658,16 +633,16 @@ The intended experience follows a clear progression:
 │  "Show me the code" │
 └──────────┬──────────┘
            ↓
-       UNDERSTANDING
+      UNDERSTANDING
 ```
 
-The product is designed to feel like a guided journey rather than a collection of disconnected dashboards.
+CODE NOIR is designed to feel like a **guided investigation**, rather than a collection of disconnected dashboards.
 
 ---
 
-# Progressive Learning
+# 🎓 Progressive Learning
 
-CODE NOIR is designed to support users from beginner to advanced levels.
+CODE NOIR supports users across different technical levels.
 
 ### Beginner
 
@@ -697,7 +672,7 @@ Technical depth increases as the user's understanding increases.
 
 ---
 
-# Technical Architecture
+# 🏗 Technical Architecture
 
 ```text
 ┌──────────────────────────────────────────────────────┐
@@ -715,21 +690,21 @@ Technical depth increases as the user's understanding increases.
                           │
                           ▼
 ┌──────────────────────────────────────────────────────┐
-│                 EVIDENCE LAYER                       │
+│                   EVIDENCE LAYER                     │
 │                                                      │
 │ Claims │ Retrieval │ Ranking │ Graph │ Citations    │
 └─────────────────────────┬────────────────────────────┘
                           │
                           ▼
 ┌──────────────────────────────────────────────────────┐
-│               CODE INTELLIGENCE                      │
+│                CODE INTELLIGENCE                     │
 │                                                      │
 │ AST │ Symbols │ Imports │ Calls │ Dependencies      │
 └─────────────────────────┬────────────────────────────┘
                           │
                           ▼
 ┌──────────────────────────────────────────────────────┐
-│                    INGESTION                         │
+│                     INGESTION                        │
 │                                                      │
 │ ZIP / Folder → Validation → Extraction → Indexing  │
 └──────────────────────────────────────────────────────┘
@@ -737,24 +712,24 @@ Technical depth increases as the user's understanding increases.
 
 ---
 
-# Technology Stack
+# 🧰 Technology Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js |
-| Language | TypeScript |
-| Frontend | React |
-| Styling | Tailwind CSS |
-| Database | SQLite / PostgreSQL |
-| ORM | Prisma |
-| Testing | Vitest |
-| AI Providers | Groq + Google Gemini |
+| Layer             | Technology            |
+| ----------------- | --------------------- |
+| Framework         | Next.js               |
+| Language          | TypeScript            |
+| Frontend          | React                 |
+| Styling           | Tailwind CSS          |
+| Database          | SQLite / PostgreSQL   |
+| ORM               | Prisma                |
+| Testing           | Vitest                |
+| AI Providers      | Groq + Google Gemini  |
 | Code Intelligence | AST / Static Analysis |
-| Build | Next.js / Turbopack |
+| Build             | Next.js / Turbopack   |
 
 ---
 
-# Project Structure
+# 📁 Project Structure
 
 ```text
 src/
@@ -769,7 +744,6 @@ src/
 │   │       ├── interrogate/
 │   │       ├── learn/
 │   │       └── security/
-│   │
 │   └── ...
 │
 ├── components/
@@ -789,30 +763,30 @@ src/
 
 ---
 
-# Getting Started
+# 🚀 Getting Started
 
 ## Prerequisites
 
-- Node.js
-- npm
-- Database configuration
-- Groq API key
-- Gemini API key
+* Node.js
+* npm
+* Database configuration
+* Groq API key
+* Gemini API key
 
-## Clone
+## 1. Clone
 
 ```bash
 git clone <YOUR_REPOSITORY_URL>
 cd code-noir
 ```
 
-## Install
+## 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-## Configure Environment
+## 3. Configure Environment
 
 Create a `.env` file:
 
@@ -826,7 +800,7 @@ GEMINI_API_KEY="your_gemini_api_key"
 
 > Never commit real credentials.
 
-## Generate Prisma Client
+## 4. Generate Prisma Client
 
 ```bash
 npx prisma generate
@@ -834,13 +808,13 @@ npx prisma generate
 
 Initialize the database according to your configured environment.
 
-## Run Development Server
+## 5. Start Development Server
 
 ```bash
 npm run dev
 ```
 
-Open:
+Then open:
 
 ```text
 http://localhost:3000
@@ -848,13 +822,13 @@ http://localhost:3000
 
 ---
 
-# Development Commands
+# 🧪 Development Commands
 
 ```bash
-# Development server
+# Development
 npm run dev
 
-# Test suite
+# Tests
 npm test
 
 # Fast evaluation
@@ -872,170 +846,154 @@ npm run build
 
 ---
 
-# Design Principles
+# 🎯 Design Principles
 
-## Evidence Before Explanation
+### Evidence Before Explanation
 
 The repository establishes the facts.
 
-## Relationships Before Isolation
+### Relationships Before Isolation
 
 Files make more sense when you understand how they connect.
 
-## Progressive Disclosure
+### Progressive Disclosure
 
-Do not expose the entire architecture at once.
+Don't expose the entire architecture at once.
 
 Reveal complexity when it becomes useful.
 
-## Conversation Over One-Shot Answers
+### Conversation Over One-Shot Answers
 
 Understanding is iterative.
 
 Users should be able to continue asking questions until the concept makes sense.
 
-## Unknown Over Hallucination
+### Unknown Over Hallucination
 
 If the evidence isn't there, say so.
 
-## Learning Over Information Dumping
+### Learning Over Information Dumping
 
 The goal isn't to show more code.
 
-The goal is to help the user understand more code.
+**The goal is to help the user understand more code.**
 
 ---
 
-# Who Is CODE NOIR For?
+# 👥 Who Is CODE NOIR For?
 
-### Students
-
-Learn how real repositories are structured.
-
-### Junior Developers
-
-Understand unfamiliar codebases without drowning in complexity.
-
-### Developers
-
-Build a mental model of an existing system faster.
-
-### Open-Source Contributors
-
-Investigate a repository before making changes.
-
-### Security Researchers
-
-Explore architecture and security-sensitive areas.
-
-### Educators
-
-Use real-world repositories as interactive learning material.
-
-### Experienced Engineers
-
-Quickly investigate large or unfamiliar systems.
+| User                        | Value                                             |
+| --------------------------- | ------------------------------------------------- |
+| 🎓 Students                 | Learn how real repositories are structured        |
+| 👨‍💻 Junior Developers     | Understand unfamiliar codebases faster            |
+| 🛠 Developers               | Build a mental model of existing systems          |
+| 🌐 Open-Source Contributors | Investigate repositories before contributing      |
+| 🛡 Security Researchers     | Explore architecture and security-sensitive areas |
+| 👨‍🏫 Educators             | Turn real repositories into learning material     |
+| 🧠 Experienced Engineers    | Investigate large or unfamiliar systems faster    |
 
 ---
 
-# What CODE NOIR Is Not
+# 🚫 What CODE NOIR Is Not
 
 CODE NOIR is intentionally not:
 
-- An autonomous coding agent
-- An arbitrary shell execution environment
-- A production code modification system
-- A replacement for an IDE
-- An automatic vulnerability certification system
-- A guarantee that every AI response is correct
+* An autonomous coding agent
+* An arbitrary shell execution environment
+* A production code modification system
+* A replacement for an IDE
+* An automatic vulnerability certification system
+* A guarantee that every AI response is correct
 
-CODE NOIR is an **investigation and learning environment**.
+CODE NOIR is an:
+
+> **Investigation and learning environment for understanding software systems.**
 
 ---
 
-# Security Disclaimer
+# ⚠️ Limitations
+
+CODE NOIR primarily performs static analysis.
+
+It cannot automatically establish runtime behavior that isn't represented in the uploaded source or available project artifacts.
+
+Examples include:
+
+* External infrastructure
+* Unavailable databases
+* Runtime-generated code
+* Undocumented services
+* Environment-specific behavior
+* External APIs without local representations
+
+When evidence is missing, the system should communicate uncertainty rather than pretending otherwise.
+
+---
+
+# 🗺 Roadmap
+
+## Investigation
+
+* [ ] Deeper execution-flow reconstruction
+* [ ] Improved framework detection
+* [ ] Advanced dependency analysis
+* [ ] Repository comparison
+* [ ] Git history investigation
+* [ ] Commit-level architecture changes
+
+## Learning
+
+* [ ] Adaptive learning paths
+* [ ] More interactive challenges
+* [ ] Spaced repetition
+* [ ] Personalized curriculum
+* [ ] Learning analytics
+
+## AI
+
+* [ ] Improved multi-turn repository reasoning
+* [ ] Better contextual memory
+* [ ] More evidence-aware explanations
+* [ ] Additional model providers
+* [ ] Advanced tutoring modes
+
+## Security
+
+* [ ] Expanded static security rules
+* [ ] Dependency intelligence
+* [ ] Security investigation workflows
+* [ ] Improved finding correlation
+
+## Collaboration
+
+* [ ] Team investigations
+* [ ] Shared cases
+* [ ] Investigation reports
+* [ ] Exportable architecture maps
+
+---
+
+# 🔒 Security Disclaimer
 
 Uploaded repositories may contain sensitive information.
 
 Do not upload repositories containing:
 
-- Production credentials
-- Private keys
-- Confidential customer information
-- Proprietary source code
-- Sensitive infrastructure information
+* Production credentials
+* Private keys
+* Confidential customer information
+* Proprietary source code
+* Sensitive infrastructure information
 
 unless you understand the security implications of your deployment.
 
 CODE NOIR intentionally avoids arbitrary execution of uploaded source code.
 
-Security findings generated by static analysis must be manually validated before being treated as confirmed vulnerabilities.
+Security findings generated through static analysis must be manually validated before being treated as confirmed vulnerabilities.
 
 ---
 
-# Roadmap
-
-## Investigation
-
-- [ ] Deeper execution-flow reconstruction
-- [ ] Improved framework detection
-- [ ] Advanced dependency analysis
-- [ ] Repository comparison
-- [ ] Git history investigation
-- [ ] Commit-level architecture changes
-
-## Learning
-
-- [ ] More adaptive learning paths
-- [ ] More interactive challenges
-- [ ] Spaced repetition
-- [ ] Personalized curriculum
-- [ ] Learning analytics
-
-## AI
-
-- [ ] Improved multi-turn repository reasoning
-- [ ] Better contextual memory
-- [ ] More evidence-aware explanations
-- [ ] Additional model providers
-- [ ] More advanced tutoring modes
-
-## Security
-
-- [ ] Expanded static security rules
-- [ ] Dependency intelligence
-- [ ] Security investigation workflows
-- [ ] Improved finding correlation
-
-## Collaboration
-
-- [ ] Team investigations
-- [ ] Shared cases
-- [ ] Investigation reports
-- [ ] Exportable architecture maps
-
----
-
-# Limitations
-
-CODE NOIR performs static analysis.
-
-It cannot automatically establish runtime behavior that is not represented in the uploaded source or available project artifacts.
-
-Examples may include:
-
-- External infrastructure
-- Unavailable databases
-- Runtime-generated code
-- Undocumented services
-- Environment-specific behavior
-- External APIs without local representations
-
-When evidence is missing, the system should distinguish uncertainty rather than pretending otherwise.
-
----
-
-# Contributing
+# 🤝 Contributing
 
 Contributions are welcome.
 
@@ -1050,10 +1008,10 @@ npm run build
 
 Please keep contributions:
 
-- Focused
-- Tested
-- Documented
-- Backwards compatible where possible
+* Focused
+* Tested
+* Documented
+* Backwards compatible where possible
 
 For significant architectural changes, describe:
 
@@ -1065,11 +1023,11 @@ For significant architectural changes, describe:
 
 ---
 
-# License
+# 📄 License
 
 Add the project's chosen license here.
 
-For example:
+Example:
 
 ```text
 MIT License
@@ -1077,7 +1035,7 @@ MIT License
 
 ---
 
-# The Idea Behind CODE NOIR
+# ◼ The Idea Behind CODE NOIR
 
 Software is rarely difficult simply because there are too many lines of code.
 
@@ -1113,7 +1071,7 @@ CODE NOIR is built around one idea:
 
 **Investigate it. Learn it. Understand it.**
 
-<br/>
+<br>
 
 `UPLOAD` · `INVESTIGATE` · `QUESTION` · `LEARN` · `UNDERSTAND`
 
