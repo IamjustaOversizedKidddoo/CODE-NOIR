@@ -121,15 +121,13 @@ export async function fetchGitHubRepositoryZipball(
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        if (response.status === 404) {
-          // Candidate URL 404'd, try next candidate branch
-          continue;
-        }
-        if (response.status === 403) {
-          throw new IngestionSecurityError(
-            `Access forbidden by GitHub for repository ${owner}/${repo}. Check if the repository is public.`,
-            'GITHUB_ACCESS_FORBIDDEN'
+        if (response.status === 404 || response.status === 403 || response.status === 429) {
+          // Candidate URL returned non-200 status, continue trying next candidate URL
+          lastError = new IngestionSecurityError(
+            `GitHub returned status ${response.status} for ${downloadUrl}`,
+            'GITHUB_FETCH_FAILED'
           );
+          continue;
         }
         throw new IngestionSecurityError(
           `GitHub returned HTTP error ${response.status} ${response.statusText}`,
@@ -184,11 +182,8 @@ export async function fetchGitHubRepositoryZipball(
     }
   }
 
-  throw (
-    lastError ||
-    new IngestionSecurityError(
-      `Could not locate or download public GitHub repository ${owner}/${repo}. Verify the URL and repository visibility.`,
-      'GITHUB_REPO_NOT_FOUND'
-    )
+  throw new IngestionSecurityError(
+    `Could not locate or download public GitHub repository "${owner}/${repo}". Please verify that the repository exists, is set to public, and contains source files.`,
+    'GITHUB_REPO_NOT_FOUND'
   );
 }

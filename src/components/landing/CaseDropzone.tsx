@@ -334,7 +334,8 @@ export function CaseDropzone() {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || 'Failed to analyze evidence.');
+        const detailedMsg = errorData.error || errorData.message || `Ingestion failed with HTTP status ${res.status}.`;
+        throw new Error(detailedMsg);
       }
 
       const data = await res.json();
