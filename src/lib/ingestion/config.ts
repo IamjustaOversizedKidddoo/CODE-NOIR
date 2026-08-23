@@ -14,14 +14,17 @@ export function getIngestionConfig(): IngestionConfig {
     process.cwd().startsWith('/var/task') ||
     process.cwd().startsWith('/tmp');
 
-  const defaultStorage = isServerless
-    ? path.join('/tmp', '.storage')
-    : path.join(process.cwd(), '.storage');
+  let storageRoot: string;
+  if (isServerless) {
+    storageRoot = '/tmp/.storage';
+  } else if (process.env.STORAGE_ROOT) {
+    storageRoot = path.resolve(process.env.STORAGE_ROOT);
+  } else {
+    storageRoot = path.join(process.cwd(), '.storage');
+  }
 
   return {
-    storageRoot: process.env.STORAGE_ROOT
-      ? path.resolve(process.env.STORAGE_ROOT)
-      : defaultStorage,
+    storageRoot,
     maxExtractedBytes: parseInt(
       process.env.MAX_EXTRACTED_BYTES || '262144000',
       10
