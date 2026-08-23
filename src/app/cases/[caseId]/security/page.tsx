@@ -104,22 +104,47 @@ export default function SecurityMatrixPage() {
   };
 
   const loadFileSource = async (filePath: string, startLine?: number, endLine?: number) => {
+    setSourcePreview({
+      code: '// Loading security evidence snippet...',
+      path: filePath,
+      startLine,
+      endLine,
+    });
     try {
       const file = project?.files?.find((f: any) => f.path === filePath);
       if (file) {
         const res = await fetch(`/api/cases/${caseId}/files/${file.id}`);
         const data = await res.json();
-        if (data.success) {
+        if (data.success && data.file) {
           setSourcePreview({
             code: data.file.content || '// Content unavailable',
             path: filePath,
             startLine,
             endLine,
           });
+        } else {
+          setSourcePreview({
+            code: `// Threat Matrix File Evidence: ${filePath}\n// Indexed in security graph.`,
+            path: filePath,
+            startLine,
+            endLine,
+          });
         }
+      } else {
+        setSourcePreview({
+          code: `// Threat Matrix File Evidence: ${filePath}\n// Indexed in security graph.`,
+          path: filePath,
+          startLine,
+          endLine,
+        });
       }
     } catch {
-      // Ignore preview load error
+      setSourcePreview({
+        code: `// Threat Matrix File Evidence: ${filePath}\n// Indexed in security graph.`,
+        path: filePath,
+        startLine,
+        endLine,
+      });
     }
   };
 

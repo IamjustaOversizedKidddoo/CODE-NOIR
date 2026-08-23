@@ -24,25 +24,27 @@ export default function CaseBriefPage() {
 
     async function loadCaseData() {
       try {
-        const [projRes, pathRes] = await Promise.all([
-          fetch(`/api/cases/${caseId}`),
-          fetch(`/api/cases/${caseId}/learning-path`),
-        ]);
-
+        const projRes = await fetch(`/api/cases/${caseId}`);
         const data = await projRes.json();
-        const pathData = await pathRes.json();
-
         const projectData = data.case || data.project;
         if (data.success && projectData) {
           setProject(projectData);
-        }
-        if (pathData.success && pathData.learningPath) {
-          setLearningPath(pathData.learningPath);
         }
       } catch (err) {
         console.error('Failed to load case brief:', err);
       } finally {
         setLoading(false);
+      }
+
+      // Asynchronously load learning path in background without locking page render
+      try {
+        const pathRes = await fetch(`/api/cases/${caseId}/learning-path`);
+        const pathData = await pathRes.json();
+        if (pathData.success && pathData.learningPath) {
+          setLearningPath(pathData.learningPath);
+        }
+      } catch {
+        // Ignore background learning path failure
       }
     }
 
