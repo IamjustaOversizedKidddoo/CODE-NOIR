@@ -23,6 +23,8 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@libsql/client": "^0.17.4",
+    "@prisma/adapter-libsql": "^7.9.1",
     "@prisma/client": "^6.4.1",
     "adm-zip": "^0.5.16",
     "clsx": "^2.1.1",
