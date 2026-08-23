@@ -274,16 +274,32 @@ export function CaseDropzone() {
     }
 
     setIsUploading(true);
-    setUploadProgress(10);
+    setUploadProgress(15);
+    setStatusLog('[STEP 1/4] SECURING SANDBOX ENVIRONMENT & CONNECTING TO VAULT...');
     setErrorMsg(null);
+
+    let progressTimer: NodeJS.Timeout | undefined = undefined;
+
+    // Smoothly animate progress bar from 15% up to 92% while server processes ingestion
+    progressTimer = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev >= 92) return 92;
+        const next = prev + Math.floor(Math.random() * 4) + 2; // +2% to +5% tick
+        if (next >= 30 && next < 55) {
+          setStatusLog('[STEP 2/4] DISCOVERING EVIDENCE & COMPUTING SHA-256 HASHES...');
+        } else if (next >= 55 && next < 78) {
+          setStatusLog('[STEP 3/4] DECONSTRUCTING AST & MAPPING CROSS-MODULE DEPENDENCIES...');
+        } else if (next >= 78) {
+          setStatusLog('[STEP 4/4] RUNNING SECURITY AUDIT & GENERATING DOSSIER...');
+        }
+        return Math.min(next, 92);
+      });
+    }, 400);
 
     try {
       let res: Response;
 
       if (isGitHubSubmission) {
-        setStatusLog('CONNECTING TO GITHUB VAULT & DOWNLOADING ARCHIVE...');
-        setUploadProgress(30);
-
         res = await fetch('/api/upload', {
           method: 'POST',
           headers: {
@@ -294,7 +310,6 @@ export function CaseDropzone() {
           }),
         });
       } else {
-        setStatusLog('SECURING SANDBOX ENVIRONMENT...');
         const formData = new FormData();
 
         if (hasZip && selectedFile) {
@@ -309,17 +324,13 @@ export function CaseDropzone() {
           }
         }
 
-        setStatusLog('ANALYZING & DECOMPRESSING EVIDENCE...');
-        setUploadProgress(40);
-
         res = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
         });
       }
 
-      setUploadProgress(75);
-      setStatusLog('BUILDING STATIC AST & SYMBOL GRAPH...');
+      if (progressTimer) clearInterval(progressTimer);
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -346,9 +357,11 @@ export function CaseDropzone() {
         window.location.href = `/cases/${data.caseId}`;
       }, 1200);
     } catch (err: any) {
+      if (progressTimer) clearInterval(progressTimer);
       setErrorMsg(err.message || 'Evidence ingestion aborted due to security violation.');
       setStatusLog('SECURITY INTERVENTION OCCURRED.');
     } finally {
+      if (progressTimer) clearInterval(progressTimer);
       setIsUploading(false);
     }
   };
