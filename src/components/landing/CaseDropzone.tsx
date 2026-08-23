@@ -16,12 +16,108 @@ interface IngestionSummary {
   primaryLang: string;
 }
 
+interface FolderFileItem {
+  file: File;
+  relativePath: string;
+}
+
+const IGNORED_DIRS = new Set([
+  '.git',
+  '.svn',
+  '.hg',
+  'node_modules',
+  '.next',
+  'dist',
+  'build',
+  'out',
+  'coverage',
+  '__pycache__',
+  '.pytest_cache',
+  '.mypy_cache',
+  '.venv',
+  'venv',
+  'env',
+  '.idea',
+  '.vscode',
+  '.turbo',
+  '.cache',
+  '.parcel-cache',
+  'target',
+  'vendor',
+]);
+
+function isIgnoredRelativePath(relPath: string): boolean {
+  const normalized = relPath.replace(/\\/g, '/');
+  const segments = normalized.split('/').filter(Boolean);
+  for (let i = 0; i < segments.length; i++) {
+    const isDirSegment = i < segments.length - 1;
+    if (isDirSegment && IGNORED_DIRS.has(segments[i].toLowerCase())) {
+      return true;
+    }
+  }
+  return false;
+}
+
+async function readFileSystemEntry(
+  entry: any,
+  pathPrefix: string = ''
+): Promise<FolderFileItem[]> {
+  if (!entry) return [];
+  const results: FolderFileItem[] = [];
+
+  if (entry.isFile) {
+    try {
+      const file = await new Promise<File>((resolve, reject) => {
+        entry.file(resolve, reject);
+      });
+      const relPath = pathPrefix ? `${pathPrefix}/${file.name}` : file.name;
+      if (!isIgnoredRelativePath(relPath)) {
+        results.push({ file, relativePath: relPath });
+      }
+    } catch {
+      // Ignore read errors for inaccessible individual entries
+    }
+  } else if (entry.isDirectory) {
+    if (IGNORED_DIRS.has(entry.name.toLowerCase())) {
+      return []; // Skip ignored directory completely
+    }
+
+    const currentPrefix = pathPrefix ? `${pathPrefix}/${entry.name}` : entry.name;
+    const dirReader = entry.createReader();
+
+    const readEntriesBatch = (): Promise<any[]> => {
+      return new Promise((resolve) => {
+        dirReader.readEntries(
+          (entries: any[]) => resolve(entries),
+          () => resolve([])
+        );
+      });
+    };
+
+    let entries: any[] = [];
+    let batch: any[] = [];
+    do {
+      batch = await readEntriesBatch();
+      if (batch.length > 0) {
+        entries.push(...batch);
+      }
+    } while (batch.length > 0);
+
+    for (const childEntry of entries) {
+      const childResults = await readFileSystemEntry(childEntry, currentPrefix);
+      results.push(...childResults);
+    }
+  }
+
+  return results;
+}
+
 export function CaseDropzone() {
   const [intakeMode, setIntakeMode] = useState<'FILES' | 'GITHUB'>('FILES');
   const [githubUrl, setGithubUrl] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedFolderFiles, setSelectedFolderFiles] = useState<File[]>([]);
+  const [selectedFolderFiles, setSelectedFolderFiles] = useState<FolderFileItem[]>([]);
   const [folderName, setFolderName] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -41,23 +137,76 @@ export function CaseDropzone() {
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     setErrorMsg(null);
     setIntakeMode('FILES');
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    const items = e.dataTransfer.items;
+    if (items && items.length > 0) {
+      const entryPromises: Promise<FolderFileItem[]>[] = [];
+      let isSingleZip = false;
+
+      // Check if it's a single dropped .zip archive file
+      if (items.length === 1 && e.dataTransfer.files && e.dataTransfer.files.length === 1) {
+        const file = e.dataTransfer.files[0];
+        if (file.name.toLowerCase().endsWith('.zip')) {
+          setSelectedFile(file);
+          setSelectedFolderFiles([]);
+          setFolderName('');
+          isSingleZip = true;
+        }
+      }
+
+      if (!isSingleZip) {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.kind === 'file') {
+            const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+            if (entry) {
+              entryPromises.push(readFileSystemEntry(entry));
+            } else {
+              const file = item.getAsFile();
+              if (file) {
+                const relPath = (file as any).webkitRelativePath || file.name;
+                if (!isIgnoredRelativePath(relPath)) {
+                  entryPromises.push(Promise.resolve([{ file, relativePath: relPath }]));
+                }
+              }
+            }
+          }
+        }
+
+        const nestedResults = await Promise.all(entryPromises);
+        const allDiscovered = nestedResults.flat();
+
+        if (allDiscovered.length > 0) {
+          setSelectedFolderFiles(allDiscovered);
+          setSelectedFile(null);
+          const firstRel = allDiscovered[0].relativePath;
+          const rootDir = firstRel.includes('/') ? firstRel.split('/')[0] : 'Project Folder';
+          setFolderName(rootDir);
+        }
+      }
+    } else if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const files = Array.from(e.dataTransfer.files);
       if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
         setSelectedFile(files[0]);
         setSelectedFolderFiles([]);
         setFolderName('');
       } else {
-        // Multi-file folder dropped
-        setSelectedFolderFiles(files);
+        const discovered: FolderFileItem[] = [];
+        for (const f of files) {
+          const relPath = (f as any).webkitRelativePath || f.name;
+          if (!isIgnoredRelativePath(relPath)) {
+            discovered.push({ file: f, relativePath: relPath });
+          }
+        }
+        setSelectedFolderFiles(discovered);
         setSelectedFile(null);
-        const rootDir = files[0].webkitRelativePath?.split('/')[0] || files[0].name || 'Project Folder';
+        const firstRel = discovered[0]?.relativePath || files[0].name;
+        const rootDir = firstRel.includes('/') ? firstRel.split('/')[0] : 'Project Folder';
         setFolderName(rootDir);
       }
     }
@@ -68,9 +217,16 @@ export function CaseDropzone() {
     setIntakeMode('FILES');
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      setSelectedFile(file);
-      setSelectedFolderFiles([]);
-      setFolderName('');
+      if (file.name.toLowerCase().endsWith('.zip')) {
+        setSelectedFile(file);
+        setSelectedFolderFiles([]);
+        setFolderName('');
+      } else {
+        // Handle single non-ZIP file upload gracefully
+        setSelectedFile(null);
+        setSelectedFolderFiles([{ file, relativePath: file.name }]);
+        setFolderName('Single File Evidence');
+      }
     }
   };
 
@@ -79,12 +235,25 @@ export function CaseDropzone() {
     setIntakeMode('FILES');
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
-      setSelectedFolderFiles(files);
+      const discovered: FolderFileItem[] = [];
+
+      for (const file of files) {
+        const relPath = file.webkitRelativePath || file.name;
+        if (!isIgnoredRelativePath(relPath)) {
+          discovered.push({ file, relativePath: relPath });
+        }
+      }
+
+      if (discovered.length === 0) {
+        setErrorMsg('Selected folder contain only ignored files or system directories (e.g. node_modules, .git).');
+        return;
+      }
+
+      setSelectedFolderFiles(discovered);
       setSelectedFile(null);
 
-      // Determine top-level folder name from webkitRelativePath
-      const firstPath = files[0].webkitRelativePath;
-      const rootFolder = firstPath ? firstPath.split('/')[0] : 'Project Folder';
+      const firstPath = discovered[0].relativePath;
+      const rootFolder = firstPath.includes('/') ? firstPath.split('/')[0] : 'Project Folder';
       setFolderName(rootFolder);
     }
   };
@@ -134,9 +303,9 @@ export function CaseDropzone() {
           formData.append('projectName', selectedFile.name.replace(/\.zip$/i, ''));
         } else if (hasFolder) {
           formData.append('projectName', folderName || 'Uploaded Project Folder');
-          for (const file of selectedFolderFiles) {
-            formData.append('files', file);
-            formData.append('paths', file.webkitRelativePath || file.name);
+          for (const item of selectedFolderFiles) {
+            formData.append('files', item.file);
+            formData.append('paths', item.relativePath);
           }
         }
 
@@ -153,8 +322,8 @@ export function CaseDropzone() {
       setStatusLog('BUILDING STATIC AST & SYMBOL GRAPH...');
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to analyze evidence.');
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || errorData.message || 'Failed to analyze evidence.');
       }
 
       const data = await res.json();
@@ -185,7 +354,7 @@ export function CaseDropzone() {
   };
 
 
-  const totalFolderSize = selectedFolderFiles.reduce((acc, f) => acc + f.size, 0);
+  const totalFolderSize = selectedFolderFiles.reduce((acc, item) => acc + item.file.size, 0);
 
   return (
     <div className="w-full max-w-4xl mx-auto">

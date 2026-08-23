@@ -58,12 +58,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Case B: Single ZIP Archive
-    if (singleArchive && singleArchive.size > 0 && (singleArchive.name.toLowerCase().endsWith('.zip') || multiFiles.length === 0)) {
-      const arrayBuffer = await singleArchive.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+    let isZipFile = false;
+    let singleBuffer: Buffer | null = null;
 
-      if (buffer.length === 0) {
+    if (singleArchive && singleArchive.size > 0) {
+      const arrayBuffer = await singleArchive.arrayBuffer();
+      singleBuffer = Buffer.from(arrayBuffer);
+
+      if (singleArchive.name.toLowerCase().endsWith('.zip')) {
+        isZipFile = true;
+      } else if (singleBuffer.length >= 4) {
+        // ZIP magic numbers: PK\x03\x04 or PK\x05\x06
+        if (singleBuffer[0] === 0x50 && singleBuffer[1] === 0x4b && (singleBuffer[2] === 0x03 || singleBuffer[2] === 0x05)) {
+          isZipFile = true;
+        }
+      }
+
+      if (!isZipFile && multiFiles.length === 0) {
+        // Fallback: single non-ZIP file submitted under archive/file field
+        multiFiles = [singleArchive];
+        multiPaths = [singleArchive.name];
+      }
+    }
+
+    // Case B: Single ZIP Archive
+    if (isZipFile && singleBuffer && singleArchive) {
+      if (singleBuffer.length === 0) {
         return NextResponse.json(
           {
             success: false,
@@ -74,7 +94,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const result = await runZipIngestionPipeline(buffer, {
+      const result = await runZipIngestionPipeline(singleBuffer, {
         projectName: projectName || singleArchive.name.replace(/\.zip$/i, ''),
       });
 
