@@ -9,7 +9,12 @@ export interface IngestionConfig {
 }
 
 export function getIngestionConfig(): IngestionConfig {
-  const defaultStorage = process.env.VERCEL
+  const isServerless =
+    !!process.env.VERCEL ||
+    process.cwd().startsWith('/var/task') ||
+    process.cwd().startsWith('/tmp');
+
+  const defaultStorage = isServerless
     ? path.join('/tmp', '.storage')
     : path.join(process.cwd(), '.storage');
 
